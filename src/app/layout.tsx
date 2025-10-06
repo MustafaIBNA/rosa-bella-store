@@ -7,8 +7,8 @@ import { cn } from '@/lib/utils';
 import { FirebaseClientProvider } from '@/firebase';
 
 export const metadata: Metadata = {
-  title: 'Artisan Showcase',
-  description: 'A showcase for beautiful handcrafted candles and coasters.',
+  title: 'Rosabella',
+  description: 'Discover our collection of handcrafted goods.',
 };
 
 export default function RootLayout({
