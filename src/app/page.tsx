@@ -1,28 +1,47 @@
 'use client';
-import { useContext } from 'react';
+import { useContext, useMemo } from 'react';
 import { ProductContext } from '@/context/ProductContext';
 import { ProductCard } from '@/components/ProductCard';
+import { Product } from '@/lib/types';
 
 export default function Home() {
   const { products } = useContext(ProductContext);
+
+  const categories = useMemo(() => {
+    return products.reduce((acc, product) => {
+      if (!acc[product.category]) {
+        acc[product.category] = [];
+      }
+      acc[product.category].push(product);
+      return acc;
+    }, {} as Record<Product['category'], Product[]>);
+  }, [products]);
 
   return (
     <main className="flex-1">
       <section className="w-full py-12 md:py-24 lg:py-32">
         <div className="container px-4 md:px-6">
-          <div className="flex flex-col items-center space-y-4 text-center">
-            <div className="space-y-2">
-              <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none font-headline">
-                Our Artisan Collection
-              </h1>
-              <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
-                Discover our handcrafted candles and coasters, made with love and care.
-              </p>
-            </div>
+          <div className="flex flex-col items-center space-y-4 text-center mb-12">
+            <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none font-headline">
+              Our Artisan Collection
+            </h1>
+            <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
+              Discover our handcrafted candles and coasters, made with love and care.
+            </p>
           </div>
-          <div className="mx-auto grid grid-cols-1 gap-6 py-12 sm:grid-cols-2 md:grid-cols-3 lg:gap-12">
-            {products.map((product, index) => (
-              <ProductCard key={product.id} product={product} index={index} />
+          
+          <div className="space-y-16">
+            {(Object.keys(categories) as (keyof typeof categories)[]).sort().map(categoryName => (
+              <div key={categoryName}>
+                <h2 className="text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl font-headline text-center mb-8">
+                  {categoryName}s
+                </h2>
+                <div className="mx-auto grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:gap-12 justify-items-center">
+                  {categories[categoryName].map((product, index) => (
+                    <ProductCard key={product.id} product={product} index={index} />
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         </div>

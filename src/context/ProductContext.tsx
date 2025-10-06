@@ -3,12 +3,13 @@ import { createContext, useState, ReactNode, useMemo } from 'react';
 import type { Product } from '@/lib/types';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 
-const initialProducts: Product[] = PlaceHolderImages.map((img, index) => ({
+const initialProducts: Product[] = PlaceHolderImages.map((img) => ({
   id: img.id,
   name: img.imageHint.charAt(0).toUpperCase() + img.imageHint.slice(1),
   description: img.description,
   price: parseFloat((Math.random() * (40 - 15) + 15).toFixed(2)),
   imageUrl: img.imageUrl,
+  category: img.imageHint.toLowerCase().includes('candle') ? 'Candle' : 'Coaster',
 }));
 
 interface ProductContextType {
