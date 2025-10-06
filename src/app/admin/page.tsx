@@ -9,15 +9,14 @@ import { AdminDashboard } from '@/components/AdminDashboard';
 import { useToast } from '@/hooks/use-toast';
 import { LogIn } from 'lucide-react';
 import { useUser, useAuth } from '@/firebase';
-import { initiateEmailSignIn, initiateAnonymousSignIn } from '@/firebase';
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
 } from 'firebase/auth';
 
 export default function AdminPage() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('admin@example.com');
+  const [password, setPassword] = useState('password');
   const { toast } = useToast();
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
@@ -30,8 +29,8 @@ export default function AdminPage() {
         toast({ title: 'Login Successful', description: 'Welcome, admin!' });
       })
       .catch((error) => {
-        if (error.code === 'auth/user-not-found') {
-          // If user not found, create a new user
+        if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+          // If user not found or invalid credential, create a new user
           createUserWithEmailAndPassword(auth, username, password)
             .then(() => {
               toast({ title: 'Account Created', description: 'Welcome, new admin!' });
