@@ -5,7 +5,7 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 const initialProducts: Product[] = PlaceHolderImages.map((img) => ({
   id: img.id,
-  name: img.imageHint.charAt(0).toUpperCase() + img.imageHint.slice(1),
+  name: img.imageHint.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
   description: img.description,
   price: 0, // Initial price set to 0
   imageUrl: img.imageUrl,

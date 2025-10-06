@@ -4,5 +4,5 @@ export type Product = {
   description: string;
   price: number;
   imageUrl: string;
-  category: 'Candle' | 'Coaster';
+  category: string;
 };
