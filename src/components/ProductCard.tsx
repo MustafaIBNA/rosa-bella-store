@@ -14,7 +14,7 @@ export function ProductCard({ product, index }: ProductCardProps) {
   if (!product) {
     return (
       <div className="w-full">
-        <Skeleton className="aspect-square w-full rounded-xl" />
+        <Skeleton className="aspect-square w-full rounded-md" />
         <div className="mt-4">
           <Skeleton className="h-6 w-3/4 mb-2" />
           <Skeleton className="h-4 w-1/2" />
@@ -31,7 +31,7 @@ export function ProductCard({ product, index }: ProductCardProps) {
       style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'backwards' }}
     >
       <CardContent className="p-0">
-        <div className="aspect-square relative overflow-hidden rounded-2xl shadow-lg group-hover:shadow-xl transition-shadow">
+        <div className="aspect-square relative overflow-hidden rounded-md shadow-lg group-hover:shadow-xl transition-shadow">
           <Image
             src={product.imageUrl}
             alt={product.name}
