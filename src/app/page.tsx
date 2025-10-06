@@ -26,7 +26,7 @@ export default function Home() {
   return (
     <main className="flex-1">
       <section className="w-full py-12 md:py-24 lg:py-32">
-        <div className="container px-4 md:px-6">
+        <div className="container mx-auto px-4 md:px-6">
           <div className="flex flex-col items-center space-y-4 text-center mb-12">
             <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none font-headline">
               Our Artisan Collection
@@ -41,8 +41,8 @@ export default function Home() {
                Array.from({ length: 2 }).map((_, i) => (
                 <div key={`category-skeleton-${i}`}>
                    <Skeleton className="h-10 w-48 mb-8" />
-                   <div className="mx-auto grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:gap-12 justify-items-center">
-                     {Array.from({ length: 3 }).map((_, j) => (
+                   <div className="mx-auto grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-items-center">
+                     {Array.from({ length: 4 }).map((_, j) => (
                        <ProductCard key={`product-skeleton-${j}`} product={null} index={j} />
                      ))}
                    </div>
@@ -50,10 +50,10 @@ export default function Home() {
                ))
             ) : (Object.keys(categories) as (keyof typeof categories)[]).sort().map(categoryName => (
               <div key={categoryName}>
-                <h2 className="text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl font-headline text-left mb-8 underline underline-offset-8">
+                <h2 className="text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl font-headline text-left mb-8">
                   {categoryName}s
                 </h2>
-                <div className="mx-auto grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:gap-12 justify-items-center">
+                <div className="mx-auto grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-items-center">
                   {categories[categoryName].map((product, index) => (
                     <ProductCard key={product.id} product={product} index={index} />
                   ))}
