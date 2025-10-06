@@ -33,7 +33,7 @@ export default function Home() {
           <div className="space-y-16">
             {(Object.keys(categories) as (keyof typeof categories)[]).sort().map(categoryName => (
               <div key={categoryName}>
-                <h2 className="text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl font-headline text-center mb-8">
+                <h2 className="text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl font-headline text-left mb-8 underline underline-offset-8">
                   {categoryName}s
                 </h2>
                 <div className="mx-auto grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:gap-12 justify-items-center">
