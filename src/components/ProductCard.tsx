@@ -1,10 +1,8 @@
 'use client';
 import Image from 'next/image';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Product } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { ShoppingCart } from 'lucide-react';
 import { Skeleton } from './ui/skeleton';
 
 interface ProductCardProps {
@@ -21,16 +19,12 @@ export function ProductCard({ product, index }: ProductCardProps) {
             <Skeleton className="h-full w-full" />
           </div>
         </CardHeader>
-        <CardContent className="p-6">
-          <Skeleton className="h-8 w-3/4 mb-2" />
+        <CardContent className="p-6 space-y-2">
+          <Skeleton className="h-8 w-3/4" />
           <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-full mt-1" />
           <Skeleton className="h-4 w-2/3 mt-1" />
+          <Skeleton className="h-8 w-20 mt-2" />
         </CardContent>
-        <CardFooter className="flex justify-between items-center p-6 pt-0">
-          <Skeleton className="h-8 w-20" />
-          <Skeleton className="h-10 w-32" />
-        </CardFooter>
       </Card>
     );
   }
@@ -38,12 +32,12 @@ export function ProductCard({ product, index }: ProductCardProps) {
   return (
     <Card
       className={cn(
-        'group w-full max-w-sm overflow-hidden transition-all duration-300 ease-in-out hover:shadow-2xl hover:-translate-y-2 animate-in fade-in-0 zoom-in-95',
+        'group w-full max-w-sm overflow-hidden transition-all duration-300 ease-in-out hover:shadow-2xl hover:-translate-y-2 animate-in fade-in-0 zoom-in-95 border-none shadow-lg rounded-xl'
       )}
       style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'backwards' }}
     >
       <CardHeader className="p-0">
-        <div className="aspect-square relative overflow-hidden">
+        <div className="aspect-[4/3] relative overflow-hidden rounded-t-xl">
           <Image
             src={product.imageUrl}
             alt={product.name}
@@ -54,17 +48,13 @@ export function ProductCard({ product, index }: ProductCardProps) {
           />
         </div>
       </CardHeader>
-      <CardContent className="p-6">
-        <CardTitle className="font-headline text-2xl mb-2">{product.name}</CardTitle>
+      <CardContent className="p-6 bg-card">
+        <div className="flex justify-between items-start">
+            <CardTitle className="font-headline text-xl mb-2 leading-tight">{product.name}</CardTitle>
+            <p className="text-lg font-bold text-primary whitespace-nowrap ml-4">${product.price.toFixed(2)}</p>
+        </div>
         <p className="text-muted-foreground text-sm line-clamp-3">{product.description}</p>
       </CardContent>
-      <CardFooter className="flex justify-between items-center p-6 pt-0">
-        <p className="text-2xl font-bold text-primary">${product.price.toFixed(2)}</p>
-        <Button>
-          <ShoppingCart className="mr-2" />
-          Add to Cart
-        </Button>
-      </CardFooter>
     </Card>
   );
 }
