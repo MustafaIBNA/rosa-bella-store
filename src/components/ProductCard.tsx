@@ -8,11 +8,33 @@ import { ShoppingCart } from 'lucide-react';
 import { Skeleton } from './ui/skeleton';
 
 interface ProductCardProps {
-  product: Product;
+  product: Product | null;
   index: number;
 }
 
 export function ProductCard({ product, index }: ProductCardProps) {
+  if (!product) {
+    return (
+      <Card className="group w-full max-w-sm overflow-hidden">
+        <CardHeader className="p-0">
+          <div className="aspect-square relative overflow-hidden">
+            <Skeleton className="h-full w-full" />
+          </div>
+        </CardHeader>
+        <CardContent className="p-6">
+          <Skeleton className="h-8 w-3/4 mb-2" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-full mt-1" />
+          <Skeleton className="h-4 w-2/3 mt-1" />
+        </CardContent>
+        <CardFooter className="flex justify-between items-center p-6 pt-0">
+          <Skeleton className="h-8 w-20" />
+          <Skeleton className="h-10 w-32" />
+        </CardFooter>
+      </Card>
+    );
+  }
+
   return (
     <Card
       className={cn(
@@ -37,11 +59,7 @@ export function ProductCard({ product, index }: ProductCardProps) {
         <p className="text-muted-foreground text-sm line-clamp-3">{product.description}</p>
       </CardContent>
       <CardFooter className="flex justify-between items-center p-6 pt-0">
-        {product.price > 0 ? (
-          <p className="text-2xl font-bold text-primary">${product.price.toFixed(2)}</p>
-        ) : (
-          <Skeleton className="h-8 w-20" />
-        )}
+        <p className="text-2xl font-bold text-primary">${product.price.toFixed(2)}</p>
         <Button>
           <ShoppingCart className="mr-2" />
           Add to Cart

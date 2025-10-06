@@ -9,9 +9,10 @@ import Image from 'next/image';
 import { Edit, PlusCircle, Trash2 } from 'lucide-react';
 import { ProductForm } from './ProductForm';
 import type { Product } from '@/lib/types';
+import { Skeleton } from './ui/skeleton';
 
 export function AdminDashboard() {
-  const { products, deleteProduct } = useContext(ProductContext);
+  const { products, deleteProduct, isLoading } = useContext(ProductContext);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
@@ -54,12 +55,26 @@ export function AdminDashboard() {
               <TableRow>
                 <TableHead className="w-[80px]">Image</TableHead>
                 <TableHead>Name</TableHead>
+                <TableHead>Category</TableHead>
                 <TableHead>Price</TableHead>
                 <TableHead className="w-[120px] text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {products.length > 0 ? (
+              {isLoading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <TableRow key={`skeleton-${i}`}>
+                    <TableCell><Skeleton className="w-16 h-16 rounded-md" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-32" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-20" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+                    <TableCell className="text-right space-x-2">
+                      <Skeleton className="h-8 w-8 inline-block" />
+                      <Skeleton className="h-8 w-8 inline-block" />
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : products.length > 0 ? (
                 products.map((product) => (
                   <TableRow key={product.id}>
                     <TableCell>
@@ -72,6 +87,7 @@ export function AdminDashboard() {
                       />
                     </TableCell>
                     <TableCell className="font-medium">{product.name}</TableCell>
+                    <TableCell>{product.category}</TableCell>
                     <TableCell>${product.price.toFixed(2)}</TableCell>
                     <TableCell className="text-right">
                       <Button variant="ghost" size="icon" onClick={() => handleEdit(product)}>
@@ -92,7 +108,7 @@ export function AdminDashboard() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center h-24">
+                  <TableCell colSpan={5} className="text-center h-24">
                     No products yet. Add one to get started!
                   </TableCell>
                 </TableRow>

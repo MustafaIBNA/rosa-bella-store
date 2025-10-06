@@ -3,19 +3,25 @@ import { useContext, useMemo } from 'react';
 import { ProductContext } from '@/context/ProductContext';
 import { ProductCard } from '@/components/ProductCard';
 import { Product } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Home() {
-  const { products } = useContext(ProductContext);
+  const { products, isLoading } = useContext(ProductContext);
 
   const categories = useMemo(() => {
+    if (isLoading || !products) {
+      return {};
+    }
     return products.reduce((acc, product) => {
-      if (!acc[product.category]) {
-        acc[product.category] = [];
+      if (!product.category) return acc;
+      const category = product.category;
+      if (!acc[category]) {
+        acc[category] = [];
       }
-      acc[product.category].push(product);
+      acc[category].push(product);
       return acc;
-    }, {} as Record<Product['category'], Product[]>);
-  }, [products]);
+    }, {} as Record<string, Product[]>);
+  }, [products, isLoading]);
 
   return (
     <main className="flex-1">
@@ -31,7 +37,18 @@ export default function Home() {
           </div>
           
           <div className="space-y-16">
-            {(Object.keys(categories) as (keyof typeof categories)[]).sort().map(categoryName => (
+            {isLoading ? (
+               Array.from({ length: 2 }).map((_, i) => (
+                <div key={`category-skeleton-${i}`}>
+                   <Skeleton className="h-10 w-48 mb-8" />
+                   <div className="mx-auto grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:gap-12 justify-items-center">
+                     {Array.from({ length: 3 }).map((_, j) => (
+                       <ProductCard key={`product-skeleton-${j}`} product={null} index={j} />
+                     ))}
+                   </div>
+                 </div>
+               ))
+            ) : (Object.keys(categories) as (keyof typeof categories)[]).sort().map(categoryName => (
               <div key={categoryName}>
                 <h2 className="text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl font-headline text-left mb-8 underline underline-offset-8">
                   {categoryName}s

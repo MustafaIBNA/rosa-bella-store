@@ -1,22 +1,22 @@
 'use client';
-import { createContext, useState, ReactNode, useMemo, useEffect } from 'react';
+import { createContext, ReactNode, useMemo } from 'react';
 import type { Product } from '@/lib/types';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
-
-const initialProducts: Product[] = PlaceHolderImages.map((img) => ({
-  id: img.id,
-  name: img.imageHint.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
-  description: img.description,
-  price: 0, // Initial price set to 0
-  imageUrl: img.imageUrl,
-  category: img.imageHint.toLowerCase().includes('candle') ? 'Candle' : 'Coaster',
-}));
+import {
+  useFirestore,
+  useCollection,
+  useMemoFirebase,
+  addDocumentNonBlocking,
+  updateDocumentNonBlocking,
+  deleteDocumentNonBlocking,
+} from '@/firebase';
+import { collection, doc } from 'firebase/firestore';
 
 interface ProductContextType {
   products: Product[];
   addProduct: (product: Omit<Product, 'id'>) => void;
   editProduct: (product: Product) => void;
   deleteProduct: (id: string) => void;
+  isLoading: boolean;
 }
 
 export const ProductContext = createContext<ProductContextType>({
@@ -24,45 +24,46 @@ export const ProductContext = createContext<ProductContextType>({
   addProduct: () => {},
   editProduct: () => {},
   deleteProduct: () => {},
+  isLoading: true,
 });
 
 export function ProductProvider({ children }: { children: ReactNode }) {
-  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const firestore = useFirestore();
 
-  useEffect(() => {
-    // Generate prices on the client side to avoid hydration errors
-    setProducts((prevProducts) =>
-      prevProducts.map((p) =>
-        p.price === 0
-          ? {
-              ...p,
-              price: parseFloat(
-                (Math.random() * (40 - 15) + 15).toFixed(2)
-              ),
-            }
-          : p
-      )
-    );
-  }, []);
+  const productsCollection = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return collection(firestore, 'products');
+  }, [firestore]);
+
+  const { data: products, isLoading } = useCollection<Product>(productsCollection);
 
   const addProduct = (product: Omit<Product, 'id'>) => {
-    const newProduct = { ...product, id: new Date().toISOString() };
-    setProducts((prev) => [newProduct, ...prev]);
+    if (!productsCollection) return;
+    addDocumentNonBlocking(productsCollection, product);
   };
 
   const editProduct = (updatedProduct: Product) => {
-    setProducts((prev) =>
-      prev.map((p) => (p.id === updatedProduct.id ? updatedProduct : p))
-    );
+    if (!firestore) return;
+    const { id, ...data } = updatedProduct;
+    const productRef = doc(firestore, 'products', id);
+    updateDocumentNonBlocking(productRef, data);
   };
 
   const deleteProduct = (id: string) => {
-    setProducts((prev) => prev.filter((p) => p.id !== id));
+    if (!firestore) return;
+    const productRef = doc(firestore, 'products', id);
+    deleteDocumentNonBlocking(productRef);
   };
 
   const value = useMemo(
-    () => ({ products, addProduct, editProduct, deleteProduct }),
-    [products]
+    () => ({
+      products: products || [],
+      addProduct,
+      editProduct,
+      deleteProduct,
+      isLoading,
+    }),
+    [products, isLoading]
   );
 
   return (

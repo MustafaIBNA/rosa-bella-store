@@ -4,6 +4,7 @@ import { Footer } from '@/components/Footer';
 import { Providers } from './providers';
 import './globals.css';
 import { cn } from '@/lib/utils';
+import { FirebaseClientProvider } from '@/firebase';
 
 export const metadata: Metadata = {
   title: 'Artisan Showcase',
@@ -23,11 +24,13 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet" />
       </head>
       <body className={cn('min-h-screen bg-background font-body antialiased flex flex-col')}>
-        <Providers>
-          <Header />
-          {children}
-          <Footer />
-        </Providers>
+        <FirebaseClientProvider>
+          <Providers>
+            <Header />
+            {children}
+            <Footer />
+          </Providers>
+        </FirebaseClientProvider>
       </body>
     </html>
   );
