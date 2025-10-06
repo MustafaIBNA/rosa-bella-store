@@ -5,6 +5,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import type { Product } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { ShoppingCart } from 'lucide-react';
+import { Skeleton } from './ui/skeleton';
 
 interface ProductCardProps {
   product: Product;
@@ -36,7 +37,11 @@ export function ProductCard({ product, index }: ProductCardProps) {
         <p className="text-muted-foreground text-sm line-clamp-3">{product.description}</p>
       </CardContent>
       <CardFooter className="flex justify-between items-center p-6 pt-0">
-        <p className="text-2xl font-bold text-primary">${product.price.toFixed(2)}</p>
+        {product.price > 0 ? (
+          <p className="text-2xl font-bold text-primary">${product.price.toFixed(2)}</p>
+        ) : (
+          <Skeleton className="h-8 w-20" />
+        )}
         <Button>
           <ShoppingCart className="mr-2" />
           Add to Cart

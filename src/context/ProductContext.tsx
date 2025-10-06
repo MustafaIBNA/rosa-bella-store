@@ -1,5 +1,5 @@
 'use client';
-import { createContext, useState, ReactNode, useMemo } from 'react';
+import { createContext, useState, ReactNode, useMemo, useEffect } from 'react';
 import type { Product } from '@/lib/types';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 
@@ -7,7 +7,7 @@ const initialProducts: Product[] = PlaceHolderImages.map((img) => ({
   id: img.id,
   name: img.imageHint.charAt(0).toUpperCase() + img.imageHint.slice(1),
   description: img.description,
-  price: parseFloat((Math.random() * (40 - 15) + 15).toFixed(2)),
+  price: 0, // Initial price set to 0
   imageUrl: img.imageUrl,
   category: img.imageHint.toLowerCase().includes('candle') ? 'Candle' : 'Coaster',
 }));
@@ -29,6 +29,22 @@ export const ProductContext = createContext<ProductContextType>({
 export function ProductProvider({ children }: { children: ReactNode }) {
   const [products, setProducts] = useState<Product[]>(initialProducts);
 
+  useEffect(() => {
+    // Generate prices on the client side to avoid hydration errors
+    setProducts((prevProducts) =>
+      prevProducts.map((p) =>
+        p.price === 0
+          ? {
+              ...p,
+              price: parseFloat(
+                (Math.random() * (40 - 15) + 15).toFixed(2)
+              ),
+            }
+          : p
+      )
+    );
+  }, []);
+
   const addProduct = (product: Omit<Product, 'id'>) => {
     const newProduct = { ...product, id: new Date().toISOString() };
     setProducts((prev) => [newProduct, ...prev]);
@@ -44,7 +60,10 @@ export function ProductProvider({ children }: { children: ReactNode }) {
     setProducts((prev) => prev.filter((p) => p.id !== id));
   };
 
-  const value = useMemo(() => ({ products, addProduct, editProduct, deleteProduct }), [products]);
+  const value = useMemo(
+    () => ({ products, addProduct, editProduct, deleteProduct }),
+    [products]
+  );
 
   return (
     <ProductContext.Provider value={value}>{children}</ProductContext.Provider>
