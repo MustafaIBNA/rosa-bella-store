@@ -1,0 +1,48 @@
+/**
+ * @file Firebase Security Rules for the Artisan Showcase Products.
+ *
+ * Core Philosophy:
+ * This ruleset allows public read access to product information while restricting write access to authenticated admins only.
+ *
+ * Data Structure:
+ * All product data is stored in the top-level `/products/{productId}` collection.
+ *
+ * Key Security Decisions:
+ * - Public read access is granted to the `/products` collection to showcase products to all users.
+ * - Only authenticated admins can create, update, or delete product documents.  A helper function `isAdmin()` is used to define admin status.
+ * - No user listing is permitted.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Manages product information (name, description, price, imageUrl). Only accessible and modifiable by authenticated admins.
+     * @path /products/{productId}
+     * @allow (get, list): Anyone can view the product details.
+     * @allow (create, update, delete): Only admins can create, update, or delete products.
+     * @deny (create, update, delete): Non-admins cannot create, update, or delete products.
+     * @principle Allows public read access while restricting writes to admins only.
+     */
+    match /products/{productId} {
+      // Allow anyone to read product information
+      allow get: if true;
+      allow list: if true;
+
+      // Only allow admins to create, update, and delete products
+      allow create: if isAdmin();
+      allow update: if isAdmin() && resource != null;
+      allow delete: if isAdmin() && resource != null;
+    }
+
+    // Define admin role
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.admin == true;
+    }
+
+    // Define authentication status
+    function isSignedIn() {
+      return request.auth != null;
+    }
+  }
+}

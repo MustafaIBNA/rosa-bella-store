@@ -1,0 +1,67 @@
+{
+  "entities": {
+    "Product": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Product",
+      "type": "object",
+      "description": "Represents a product (candle or coaster) in the Artisan Showcase.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the product."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the product."
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed description of the product."
+        },
+        "price": {
+          "type": "number",
+          "description": "The price of the product."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL of the image for the product.",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "price",
+        "imageUrl"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/products/{productId}",
+        "definition": {
+          "entityName": "Product",
+          "schema": {
+            "$ref": "#/backend/entities/Product"
+          },
+          "description": "Stores product information (name, description, price, imageUrl). Only accessible and modifiable by authenticated admins.",
+          "params": [
+            {
+              "name": "productId",
+              "description": "The unique identifier of the product."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The database structure is designed to securely manage product data for the Artisan Showcase. It prioritizes authorization independence to ensure robust security rules and atomic operations. The design uses structural segregation to separate concerns and access modeling to standardize authorization patterns.\n\n`/products` collection:\nThis collection stores the product details (candles and coasters). No user-specific data is stored here, and this collection is meant to be publicly readable, enabling the showcasing of the artisan products. Security rules will be configured to allow only authenticated admins to create, update, or delete documents. This setup provides a clear separation between product data and admin access rights, simplifying security rules and enhancing debuggability.\n\nQAPs (Query Authorization Patterns):\n*   The use of a top-level `/products` collection enables efficient listing and retrieval of all products without requiring complex filtering rules. The absence of hierarchical authorization dependencies (no `get()` calls in rules) ensures that listing operations are secure and scalable.\n*   Segregation of admin-only data into a different authorization context ensures that regular users cannot tamper with the product catalog."
+  }
+}
