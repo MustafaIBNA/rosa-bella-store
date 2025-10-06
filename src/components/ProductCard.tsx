@@ -1,6 +1,6 @@
 'use client';
 import Image from 'next/image';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import type { Product } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { Skeleton } from './ui/skeleton';
@@ -26,7 +26,7 @@ export function ProductCard({ product, index }: ProductCardProps) {
   return (
     <Card
       className={cn(
-        'group w-full max-w-sm overflow-hidden transition-all duration-300 ease-in-out bg-transparent border-none shadow-none animate-in fade-in-0 zoom-in-95'
+        'group w-full max-w-sm overflow-hidden transition-all duration-300 ease-in-out border-none shadow-none bg-transparent animate-in fade-in-0 zoom-in-95'
       )}
       style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'backwards' }}
     >
@@ -41,7 +41,7 @@ export function ProductCard({ product, index }: ProductCardProps) {
             data-ai-hint="product image"
           />
         </div>
-        <div className="pt-4 text-center">
+        <div className="pt-4 text-left">
           <h3 className="font-headline text-lg font-medium text-foreground">{product.name}</h3>
           <p className="text-md text-primary font-semibold">${product.price.toFixed(2)}</p>
         </div>

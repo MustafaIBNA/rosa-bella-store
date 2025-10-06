@@ -50,9 +50,9 @@ export default function Home() {
                ))
             ) : (Object.keys(categories) as (keyof typeof categories)[]).sort().map(categoryName => (
               <div key={categoryName}>
-                <h2 className="text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl font-headline text-left mb-8">
+                <h1 className="text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl font-headline text-left mb-8 underline underline-offset-8">
                   {categoryName}s
-                </h2>
+                </h1>
                 <div className="mx-auto grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-items-center">
                   {categories[categoryName].map((product, index) => (
                     <ProductCard key={product.id} product={product} index={index} />
