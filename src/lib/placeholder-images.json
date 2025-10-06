@@ -1,3 +1,40 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "candle-1",
+      "description": "A handcrafted scented candle in a ceramic jar.",
+      "imageUrl": "https://images.unsplash.com/photo-1557176286-97a841415173?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhcnRpc2FuJTIwY2FuZGxlfGVufDB8fHx8MTc1OTcxODQwMHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "artisan candle"
+    },
+    {
+      "id": "coaster-1",
+      "description": "A set of four artisanal wooden coasters.",
+      "imageUrl": "https://images.unsplash.com/photo-1674468951075-bbc486fd335a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHx3b29kZW4lMjBjb2FzdGVyc3xlbnwwfHx8fDE3NTk3MDk4OTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "wooden coasters"
+    },
+    {
+      "id": "candle-2",
+      "description": "A tall, elegant pillar candle with a subtle vanilla scent.",
+      "imageUrl": "https://images.unsplash.com/photo-1683402260401-b9f153fdbebf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxwaWxsYXIlMjBjYW5kbGV8ZW58MHx8fHwxNzU5Njg0ODE4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "pillar candle"
+    },
+    {
+      "id": "coaster-2",
+      "description": "A beautiful single resin coaster with gold flakes.",
+      "imageUrl": "https://images.unsplash.com/photo-1729450652128-f2d257a47f74?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxyZXNpbiUyMGNvYXN0ZXJ8ZW58MHx8fHwxNzU5NjcwNTYwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "resin coaster"
+    },
+    {
+      "id": "candle-3",
+      "description": "A soy wax candle in a rustic amber glass.",
+      "imageUrl": "https://images.unsplash.com/photo-1643717714079-b5c739c1e420?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxzb3klMjBjYW5kbGV8ZW58MHx8fHwxNzU5NjY4NzAyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "soy candle"
+    },
+    {
+      "id": "coaster-3",
+      "description": "A set of minimalist concrete coasters.",
+      "imageUrl": "https://images.unsplash.com/photo-1739681407440-ef69caf4850d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjb25jcmV0ZSUyMGNvYXN0ZXJzfGVufDB8fHx8MTc1OTcxODQwMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "concrete coasters"
+    }
+  ]
 }
