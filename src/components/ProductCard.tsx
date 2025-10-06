@@ -1,6 +1,6 @@
 'use client';
 import Image from 'next/image';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import type { Product } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { Skeleton } from './ui/skeleton';
@@ -13,9 +13,9 @@ interface ProductCardProps {
 export function ProductCard({ product, index }: ProductCardProps) {
   if (!product) {
     return (
-      <div className="group w-full max-w-sm">
-        <Skeleton className="aspect-square w-full rounded-2xl" />
-        <div className="py-4">
+      <div className="w-full">
+        <Skeleton className="aspect-square w-full rounded-xl" />
+        <div className="mt-4">
           <Skeleton className="h-6 w-3/4 mb-2" />
           <Skeleton className="h-4 w-1/2" />
         </div>
@@ -26,7 +26,7 @@ export function ProductCard({ product, index }: ProductCardProps) {
   return (
     <Card
       className={cn(
-        'group w-full max-w-sm overflow-hidden transition-all duration-300 ease-in-out hover:shadow-2xl hover:-translate-y-1 animate-in fade-in-0 zoom-in-95 bg-transparent border-none shadow-none'
+        'group w-full max-w-sm overflow-hidden transition-all duration-300 ease-in-out bg-transparent border-none shadow-none animate-in fade-in-0 zoom-in-95'
       )}
       style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'backwards' }}
     >
