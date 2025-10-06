@@ -26,30 +26,28 @@ export function ProductCard({ product, index }: ProductCardProps) {
   return (
 <Card
   className={cn(
-    'group w-full max-w-sm overflow-hidden rounded-sm border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 ease-in-out hover:-translate-y-0.5 bg-[#FFFCF7]'
+    'group w-full max-w-sm overflow-hidden rounded-lg border-0 shadow-none transition-all duration-300 ease-in-out bg-transparent'
   )}
   style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'backwards' }}
 >
-  <CardContent className="p-3">
-    <div className="aspect-square relative overflow-hidden rounded-xs">
-      <Image
+  <CardContent className="p-0">
+    <div className="aspect-square relative overflow-hidden rounded-md">
+       <Image
         src={product.imageUrl}
         alt={product.name}
         fill
-        className="object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
+        className="object-cover transition-transform duration-300 ease-in-out group-hover:scale-105 rounded-[4px]"
         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
       />
     </div>
-    <div className="pt-3 text-left">
+    <div className="pt-4 text-left">
       <div className="flex items-center justify-between">
-        <h3 className="font-medium text-base text-gray-900">{product.name}</h3>
-        <p className="text-md font-semibold text-yellow-700">${product.price.toFixed(2)}</p>
+        <h3 className="font-medium text-base text-foreground">{product.name}</h3>
+        <p className="text-md font-semibold text-accent-foreground/80">${product.price.toFixed(2)}</p>
       </div>
-      <p className="text-sm text-gray-600 mt-1 line-clamp-2">{product.description}</p>
+       <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{product.description}</p>
     </div>
   </CardContent>
 </Card>
-
-
   );
 }
