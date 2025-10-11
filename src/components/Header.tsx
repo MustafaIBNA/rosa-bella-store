@@ -1,5 +1,8 @@
+'use client';
+
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { Facebook } from 'lucide-react';
 
 export function Header() {
   return (
@@ -9,7 +12,7 @@ export function Header() {
           Rosabella
         </Link>
       </div>
-      <nav className="flex gap-4 sm:gap-6">
+      <nav className="flex gap-4 sm:gap-6 items-center">
         <Button variant="ghost" asChild>
           <Link
             href="/"
@@ -17,6 +20,17 @@ export function Header() {
             prefetch={false}
           >
             Home
+          </Link>
+        </Button>
+        <Button variant="ghost" size="icon" asChild>
+          <Link
+            href="https://www.facebook.com/profile.php?id=61566020697244"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Facebook page"
+            prefetch={false}
+          >
+            <Facebook className="h-5 w-5" />
           </Link>
         </Button>
       </nav>
