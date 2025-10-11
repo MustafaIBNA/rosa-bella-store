@@ -4,6 +4,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import type { Product } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { Skeleton } from './ui/skeleton';
+import { Button } from './ui/button';
+import { useContext } from 'react';
+import { CartContext } from '@/context/CartContext';
+import { ShoppingCart } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface ProductCardProps {
   product: Product | null;
@@ -11,6 +16,9 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, index }: ProductCardProps) {
+  const { addToCart } = useContext(CartContext);
+  const { toast } = useToast();
+
   if (!product) {
     return (
       <div className="w-full">
@@ -22,11 +30,20 @@ export function ProductCard({ product, index }: ProductCardProps) {
       </div>
     );
   }
+  
+  const handleAddToCart = () => {
+    addToCart(product);
+    toast({
+      title: "Added to cart",
+      description: `"${product.name}" has been added to your cart.`,
+    })
+  };
+
 
   return (
     <Card
       className={cn(
-        'group w-full max-w-sm overflow-hidden rounded-lg border-none shadow-sm transition-all duration-300 ease-in-out hover:shadow-lg hover:scale-105 bg-card'
+        'group w-full max-w-sm overflow-hidden rounded-lg border-none shadow-sm transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-2 bg-card'
       )}
       style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'backwards' }}
     >
@@ -49,6 +66,9 @@ export function ProductCard({ product, index }: ProductCardProps) {
           <p className="text-sm text-muted-foreground mt-1 h-10 overflow-hidden group-hover:h-auto transition-all duration-300 ease-in-out">
             {product.description}
           </p>
+           <Button onClick={handleAddToCart} className="w-full mt-4">
+            <ShoppingCart className="mr-2 h-4 w-4" /> Add to Cart
+          </Button>
         </div>
       </CardContent>
     </Card>
