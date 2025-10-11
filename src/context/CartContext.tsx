@@ -42,10 +42,12 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    if(cart.length > 0) {
-      localStorage.setItem('cart', JSON.stringify(cart));
-    } else {
-      localStorage.removeItem('cart');
+    // This check prevents overwriting the cart with an empty array on initial load
+    if (cart.length > 0) {
+        localStorage.setItem('cart', JSON.stringify(cart));
+    } else if (localStorage.getItem('cart')) {
+        // This handles clearing the cart
+        localStorage.removeItem('cart');
     }
   }, [cart]);
 
@@ -79,6 +81,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const clearCart = () => {
     setCart([]);
+    localStorage.removeItem('cart');
   };
 
   return (
