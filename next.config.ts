@@ -33,6 +33,12 @@ const nextConfig: NextConfig = {
         hostname: 's6.imgcdn.dev',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'storage.googleapis.com',
+        port: '',
+        pathname: '/**',
       }
     ],
   },

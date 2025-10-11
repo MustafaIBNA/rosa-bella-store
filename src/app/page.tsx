@@ -4,6 +4,7 @@ import { ProductContext } from '@/context/ProductContext';
 import { ProductCard } from '@/components/ProductCard';
 import { Product } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { HeroSlider } from '@/components/HeroSlider';
 
 export default function Home() {
   const { products, isLoading } = useContext(ProductContext);
@@ -25,6 +26,7 @@ export default function Home() {
 
   return (
     <main className="flex-1">
+      <HeroSlider />
       <section className="w-full py-12 md:py-24 lg:py-32">
         <div className="container mx-auto px-4 md:px-6">
           <div className="flex flex-col items-center space-y-4 text-center mb-12">

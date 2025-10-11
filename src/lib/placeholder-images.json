@@ -1,6 +1,24 @@
 {
   "placeholderImages": [
     {
+      "id": "hero-1",
+      "description": "A collection of Rosabella handcrafted coasters and home decor items.",
+      "imageUrl": "https://storage.googleapis.com/stabl-agent-artefacts/images/m2-final/d618991a-8c5e-4c3e-b83c-66f8e71887e2.png",
+      "imageHint": "artisan home decor"
+    },
+    {
+      "id": "hero-2",
+      "description": "A beautifully lit artisan candle.",
+      "imageUrl": "https://images.unsplash.com/photo-1594313554363-6c8942a1f296?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxhcnRpc2FuJTIwY2FuZGxlfGVufDB8fHx8MTc2MDM3ODAzNnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "artisan candle"
+    },
+    {
+      "id": "hero-3",
+      "description": "Close-up of intricate details on a handmade ceramic piece.",
+      "imageUrl": "https://images.unsplash.com/photo-1605882419353-60552771c5a2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxoYW5kbWFkZSUyMGNlcmFtaWN8ZW58MHx8fHwxNzYwMzc4MDM3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "handmade ceramic"
+    },
+    {
       "id": "candle-1",
       "description": "A handcrafted scented candle in a ceramic jar.",
       "imageUrl": "https://images.unsplash.com/photo-1557176286-97a841415173?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhcnRpc2FuJTIwY2FuZGxlfGVufDB8fHx8MTc1OTcxODQwMHww&ixlib=rb-4.1.0&q=80&w=1080",
