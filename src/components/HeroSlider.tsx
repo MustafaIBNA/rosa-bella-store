@@ -14,21 +14,15 @@ const sliderImages = PlaceHolderImages.filter(img => ['hero-1', 'hero-2', 'hero-
 
 export function HeroSlider() {
   const layouts = [
-    // Layout 1: Text on Left
     {
-      textContainerClasses: "md:items-start text-left md:pl-12",
       textTitle: "Artistry in Every Detail",
       textDescription: "Discover the unique beauty of Rosabella's handcrafted coasters and home decor.",
     },
-    // Layout 2: Text on Right
     {
-      textContainerClasses: "md:items-end text-right md:pr-12",
       textTitle: "Handcrafted Elegance",
       textDescription: "Elevate your space with pieces that blend traditional craftsmanship with modern design.",
     },
-    // Layout 3: Text on Bottom Center
     {
-      textContainerClasses: "items-center text-center justify-end pb-12",
       textTitle: "Timeless Designs",
       textDescription: "From our hands to your home, experience the quality of artisan-made goods.",
     }
@@ -61,8 +55,8 @@ export function HeroSlider() {
                       data-ai-hint={image.imageHint}
                       sizes="100vw"
                     />
-                  <div className={`absolute inset-0 flex flex-col p-8 text-white ${layout.textContainerClasses}`}>
-                      <div className={index === 2 ? 'bg-black/30 p-6 rounded-lg' : ''}>
+                  <div className={`absolute inset-0 flex flex-col p-8 text-white items-center text-center justify-end pb-12`}>
+                      <div className={'bg-black/40 p-6 rounded-lg'}>
                         <h1 className="text-3xl md:text-5xl font-extrabold font-headline mb-4">
                             {layout.textTitle}
                         </h1>
