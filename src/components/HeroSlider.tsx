@@ -13,36 +13,22 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 const sliderImages = PlaceHolderImages.filter(img => ['hero-1', 'hero-2', 'hero-3'].includes(img.id));
 
 export function HeroSlider() {
-  const layouts = [
-    // Layout 1: Text on Left
+    const slideData = [
     {
-      textContainerClasses: "md:items-start text-left md:pl-12",
       textTitle: "Artistry in Every Detail",
       textDescription: "Discover the unique beauty of Rosabella's handcrafted coasters and home decor.",
-      imageContainerClasses: "md:w-1/2 p-8",
-      imageClasses: "object-contain h-full w-full rounded-lg shadow-2xl",
     },
-    // Layout 2: Text on Right
     {
-      textContainerClasses: "md:items-end text-right md:pr-12",
       textTitle: "Handcrafted Elegance",
       textDescription: "Elevate your space with pieces that blend traditional craftsmanship with modern design.",
-      imageContainerClasses: "md:w-1/2 p-8",
-      imageClasses: "object-contain h-full w-full rounded-lg shadow-2xl",
     },
-    // Layout 3: Text on Bottom Center
     {
-      textContainerClasses: "items-center text-center justify-end pb-12",
       textTitle: "Timeless Designs",
       textDescription: "From our hands to your home, experience the quality of artisan-made goods.",
-      imageContainerClasses: "absolute inset-0 z-[-1]",
-      imageClasses: "object-cover h-full w-full opacity-30",
     }
   ];
   
-  // Ensure we have a defined order for the images
   const orderedImages = ['hero-1', 'hero-2', 'hero-3'].map(id => sliderImages.find(img => img.id === id)).filter(Boolean) as typeof sliderImages;
-
 
   return (
     <section className="w-full bg-background">
@@ -54,9 +40,7 @@ export function HeroSlider() {
       >
         <CarouselContent className="h-[400px] md:h-[500px] lg:h-[600px]">
           {orderedImages.map((image, index) => {
-            const layout = layouts[index % layouts.length];
-            const isTextFirst = index % 2 === 1;
-
+            const slide = slideData[index % slideData.length];
             return(
               <CarouselItem key={image.id}>
                 <div className="relative h-full w-full overflow-hidden">
@@ -68,13 +52,13 @@ export function HeroSlider() {
                       data-ai-hint={image.imageHint}
                       sizes="100vw"
                     />
-                  <div className={`absolute inset-0 flex flex-col p-8 text-white ${layout.textContainerClasses}`}>
-                      <div className={index === 2 ? 'bg-black/30 p-6 rounded-lg' : ''}>
+                  <div className="absolute inset-0 flex flex-col items-center justify-end p-8 text-white text-center pb-12">
+                      <div className='bg-black/40 p-6 rounded-lg'>
                         <h1 className="text-3xl md:text-5xl font-extrabold font-headline mb-4">
-                            {layout.textTitle}
+                            {slide.textTitle}
                         </h1>
                         <p className="text-lg md:text-xl max-w-xl">
-                            {layout.textDescription}
+                            {slide.textDescription}
                         </p>
                       </div>
                   </div>
