@@ -61,7 +61,7 @@ export function ProductCard({ product, index }: ProductCardProps) {
         <div className="pt-3 text-left">
           <div className="flex items-start justify-between">
             <h3 className="font-medium text-base text-foreground pr-2">{product.name}</h3>
-            <p className="text-md font-semibold text-primary whitespace-nowrap">${product.price.toFixed(2)}</p>
+            <p className="text-md font-semibold text-primary whitespace-nowrap">EGP {product.price.toFixed(2)}</p>
           </div>
           <p className="text-sm text-muted-foreground mt-1 h-10 overflow-hidden group-hover:h-auto transition-all duration-300 ease-in-out">
             {product.description}

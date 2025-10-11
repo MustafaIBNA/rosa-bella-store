@@ -20,9 +20,9 @@ export function Header() {
     const items = cart.map(item => (
         `*${item.name}*\n` +
         `Quantity: ${item.quantity}\n` +
-        `Price: $${item.price.toFixed(2)} each`
+        `Price: EGP ${item.price.toFixed(2)} each`
     )).join('\n\n');
-    const footer = `\n\n*Total Amount: $${total.toFixed(2)}*`;
+    const footer = `\n\n*Total Amount: EGP ${total.toFixed(2)}*`;
     const message = header + items + footer;
     return encodeURIComponent(message);
   }
@@ -89,7 +89,7 @@ export function Header() {
                                         />
                                         <div className="flex-1">
                                             <p className="font-medium">{item.name}</p>
-                                            <p className="text-sm text-muted-foreground">${item.price.toFixed(2)}</p>
+                                            <p className="text-sm text-muted-foreground">EGP {item.price.toFixed(2)}</p>
                                             <div className="flex items-center gap-2 mt-2">
                                                 <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => updateQuantity(item.id, item.quantity - 1)}>-</Button>
                                                 <span>{item.quantity}</span>
@@ -107,7 +107,7 @@ export function Header() {
                         <div className="mt-auto p-4 space-y-4">
                             <div className="flex justify-between font-bold text-lg">
                                 <span>Total:</span>
-                                <span>${total.toFixed(2)}</span>
+                                <span>EGP {total.toFixed(2)}</span>
                             </div>
                             <Button
                                 className="w-full bg-[#25D366] hover:bg-[#1EBE57] text-white"
