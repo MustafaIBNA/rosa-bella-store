@@ -26,8 +26,7 @@ export function ProductCard({ product, index }: ProductCardProps) {
   return (
     <Card
       className={cn(
-        'group w-full max-w-sm overflow-hidden rounded-sm border-none shadow-sm transition-all duration-300 ease-in-out hover:shadow-lg hover:scale-105',
-        'bg-card'
+        'group w-full max-w-sm overflow-hidden rounded-sm border-none shadow-sm transition-all duration-300 ease-in-out hover:shadow-lg hover:scale-105 bg-card'
       )}
       style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'backwards' }}
     >

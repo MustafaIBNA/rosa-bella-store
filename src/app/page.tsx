@@ -41,7 +41,7 @@ export default function Home() {
                Array.from({ length: 2 }).map((_, i) => (
                 <div key={`category-skeleton-${i}`}>
                    <Skeleton className="h-10 w-48 mb-8" />
-                   <div className="mx-auto grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-items-center">
+                   <div className="grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-items-center">
                      {Array.from({ length: 4 }).map((_, j) => (
                        <ProductCard key={`product-skeleton-${j}`} product={null} index={j} />
                      ))}
@@ -53,7 +53,7 @@ export default function Home() {
                 <h1 className="text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl font-headline text-left mb-8 underline underline-offset-8">
                   {categoryName}
                 </h1>
-                <div className="mx-auto grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-items-center">
+                <div className="grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-items-center">
                   {categories[categoryName].map((product, index) => (
                     <ProductCard key={product.id} product={product} index={index} />
                   ))}
