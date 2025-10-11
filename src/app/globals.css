@@ -9,7 +9,7 @@ body {
   :root {
     --background: 45 33% 95%; /* #F4F3EA */
     --foreground: 221 21% 26%; /* #333D51 */
-    --card: 0 0% 100%;
+    --card: 0 0% 98%; /* near white */
     --card-foreground: 221 21% 26%;
     --popover: 0 0% 100%;
     --popover-foreground: 221 21% 26%;
