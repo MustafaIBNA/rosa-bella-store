@@ -7,6 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { HeroSlider } from '@/components/HeroSlider';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
 export default function Home() {
   const { products, isLoading } = useContext(ProductContext);
@@ -15,55 +16,54 @@ export default function Home() {
 
   const categories = useMemo(() => {
     if (isLoading || !products) {
-      return { allCategories: [], categorizedProducts: {} };
+      return { allCategories: [] };
     }
-    const allCategories = [...new Set(products.map(p => p.category).filter(Boolean))].sort();
-    const categorizedProducts = products.reduce((acc, product) => {
-      if (!product.category) return acc;
-      const category = product.category;
-      if (!acc[category]) {
-        acc[category] = [];
-      }
-      acc[category].push(product);
-      return acc;
-    }, {} as Record<string, Product[]>);
-
-    return { allCategories, categorizedProducts };
+    const categorySet = new Set<string>();
+    products.forEach(p => {
+        if (p.category) {
+            // Standardize to title case for uniqueness
+            const formattedCategory = p.category.charAt(0).toUpperCase() + p.category.slice(1).toLowerCase();
+            categorySet.add(formattedCategory);
+        }
+    });
+    const allCategories = [...categorySet].sort();
+    return { allCategories };
   }, [products, isLoading]);
+
 
   const filteredProducts = useMemo(() => {
     let prods = products || [];
 
+    // Apply category filter first
     if (selectedCategory) {
-      prods = prods.filter(p => p.category === selectedCategory);
+      prods = prods.filter(p => p.category?.toLowerCase() === selectedCategory.toLowerCase());
     }
 
+    // Then apply search term filter
     if (searchTerm) {
       prods = prods.filter(p =>
         p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.category?.toLowerCase().includes(searchTerm.toLowerCase())
+        p.description.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-
+    
     return prods;
   }, [products, searchTerm, selectedCategory]);
-
-  const displayedProducts = selectedCategory ? filteredProducts : products;
-
+  
   const productsByCategory = useMemo(() => {
-    if (selectedCategory) {
-      return { [selectedCategory]: filteredProducts };
-    }
-    return filteredProducts.reduce((acc, product) => {
+    const prods = selectedCategory ? filteredProducts : (products || []);
+    
+    return prods.reduce((acc, product) => {
       if (!product.category) return acc;
-      const category = product.category;
+       // Standardize to title case for grouping
+      const category = product.category.charAt(0).toUpperCase() + product.category.slice(1).toLowerCase();
       if (!acc[category]) {
         acc[category] = [];
       }
       acc[category].push(product);
       return acc;
     }, {} as Record<string, Product[]>);
-  }, [filteredProducts, selectedCategory]);
+  }, [filteredProducts, products, selectedCategory]);
 
 
   return (
@@ -80,41 +80,39 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="mb-12 space-y-6">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Input
-                type="text"
-                placeholder="Search by product or category..."
-                value={searchTerm}
-                onChange={(e) => {
-                  setSearchTerm(e.target.value);
-                  setSelectedCategory(null); // Reset category when searching
-                }}
-                className="w-full sm:max-w-xs"
-              />
-              <div className="flex gap-2 flex-wrap items-center">
-                 <Button
-                    variant={!selectedCategory ? 'default' : 'outline'}
-                    onClick={() => {
-                        setSelectedCategory(null);
-                        setSearchTerm('');
-                    }}
-                  >
-                    All
-                  </Button>
-                {categories.allCategories.map(category => (
-                  <Button
-                    key={category}
-                    variant={selectedCategory === category ? 'default' : 'outline'}
-                    onClick={() => {
-                        setSelectedCategory(category);
-                        setSearchTerm('');
-                    }}
-                  >
-                    {category}
-                  </Button>
-                ))}
-              </div>
+          <div className="mb-12 space-y-4">
+             <div className="flex flex-col gap-4">
+                <Input
+                    type="text"
+                    placeholder="Search for products..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full sm:max-w-md mx-auto"
+                />
+                <ScrollArea className="w-full whitespace-nowrap">
+                    <div className="flex justify-center gap-2 pb-4">
+                        <Button
+                        variant={!selectedCategory ? 'default' : 'outline'}
+                        onClick={() => {
+                            setSelectedCategory(null);
+                        }}
+                        >
+                        All
+                        </Button>
+                        {categories.allCategories.map(category => (
+                        <Button
+                            key={category}
+                            variant={selectedCategory?.toLowerCase() === category.toLowerCase() ? 'default' : 'outline'}
+                            onClick={() => {
+                                setSelectedCategory(selectedCategory?.toLowerCase() === category.toLowerCase() ? null : category);
+                            }}
+                        >
+                            {category}
+                        </Button>
+                        ))}
+                    </div>
+                    <ScrollBar orientation="horizontal" />
+                </ScrollArea>
             </div>
           </div>
 
