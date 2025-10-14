@@ -21,8 +21,8 @@ export default function Home() {
     const categorySet = new Set<string>();
     products.forEach(p => {
         if (p.category) {
-            // Standardize to title case for uniqueness
-            const formattedCategory = p.category.charAt(0).toUpperCase() + p.category.slice(1).toLowerCase();
+            // Trim whitespace and standardize to title case for uniqueness
+            const formattedCategory = p.category.trim().charAt(0).toUpperCase() + p.category.trim().slice(1).toLowerCase();
             categorySet.add(formattedCategory);
         }
     });
@@ -36,7 +36,7 @@ export default function Home() {
 
     // Apply category filter first
     if (selectedCategory) {
-      prods = prods.filter(p => p.category?.toLowerCase() === selectedCategory.toLowerCase());
+      prods = prods.filter(p => p.category?.trim().toLowerCase() === selectedCategory.toLowerCase());
     }
 
     // Then apply search term filter
@@ -56,7 +56,7 @@ export default function Home() {
     return prods.reduce((acc, product) => {
       if (!product.category) return acc;
        // Standardize to title case for grouping
-      const category = product.category.charAt(0).toUpperCase() + product.category.slice(1).toLowerCase();
+      const category = product.category.trim().charAt(0).toUpperCase() + product.category.trim().slice(1).toLowerCase();
       if (!acc[category]) {
         acc[category] = [];
       }

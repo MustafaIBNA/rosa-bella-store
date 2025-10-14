@@ -60,7 +60,7 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
   const onSubmit = (data: ProductFormValues) => {
     const formattedData = {
         ...data,
-        category: data.category.charAt(0).toUpperCase() + data.category.slice(1).toLowerCase()
+        category: data.category.trim().charAt(0).toUpperCase() + data.category.trim().slice(1).toLowerCase()
     };
     if (productToEdit) {
       editProduct({ ...productToEdit, ...formattedData });
