@@ -13,8 +13,8 @@ body {
     --card-foreground: 221 21% 26%;
     --popover: 0 0% 100%;
     --popover-foreground: 221 21% 26%;
-    --primary: 45 74% 50%; /* #D3AC2B */
-    --primary-foreground: 221 21% 26%;
+    --primary: 221 21% 31%; /* #3A475E - Dark Slate Blue */
+    --primary-foreground: 45 56% 94%; /* Light beige for contrast */
     --secondary: 222 10% 80%; /* #CBD0D8 */
     --secondary-foreground: 221 21% 26%;
     --muted: 222 10% 85%;
@@ -23,7 +23,7 @@ body {
     --accent-foreground: 221 21% 26%;
     --border: 222 10% 85%;
     --input: 222 10% 80%;
-    --ring: 45 74% 50%;
+    --ring: 221 21% 31%;
     --radius: 0.5rem;
   }
   .dark {

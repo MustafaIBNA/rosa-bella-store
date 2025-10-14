@@ -47,7 +47,7 @@ export function ProductCard({ product, index }: ProductCardProps) {
     <Link href={`/product/${product.id}`} className="group w-full max-w-sm block">
       <Card
         className={cn(
-          'w-full overflow-hidden rounded-lg border-none shadow-sm transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-2 bg-card'
+          'w-full overflow-hidden rounded-lg border-none shadow-sm transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-2 bg-card animate-fade-in'
         )}
         style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'backwards' }}
       >
@@ -60,6 +60,7 @@ export function ProductCard({ product, index }: ProductCardProps) {
               className="object-cover transition-transform duration-300 ease-in-out"
               style={{ borderRadius: '4px' }}
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              loading="lazy"
             />
           </div>
           <div className="pt-3 text-left">
