@@ -9,6 +9,7 @@ import { useContext } from 'react';
 import { CartContext } from '@/context/CartContext';
 import { ShoppingCart } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import Link from 'next/link';
 
 interface ProductCardProps {
   product: Product | null;
@@ -31,7 +32,9 @@ export function ProductCard({ product, index }: ProductCardProps) {
     );
   }
   
-  const handleAddToCart = () => {
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     addToCart(product);
     toast({
       title: "Added to cart",
@@ -41,36 +44,38 @@ export function ProductCard({ product, index }: ProductCardProps) {
 
 
   return (
-    <Card
-      className={cn(
-        'group w-full max-w-sm overflow-hidden rounded-lg border-none shadow-sm transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-2 bg-card'
-      )}
-      style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'backwards' }}
-    >
-      <CardContent className="p-3">
-        <div className="aspect-square relative overflow-hidden rounded-sm">
-          <Image
-            src={product.imageUrl}
-            alt={product.name}
-            fill
-            className="object-cover transition-transform duration-300 ease-in-out"
-            style={{ borderRadius: '4px' }}
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          />
-        </div>
-        <div className="pt-3 text-left">
-          <div className="flex items-start justify-between">
-            <h3 className="font-medium text-base text-foreground pr-2">{product.name}</h3>
-            <p className="text-md font-semibold text-primary whitespace-nowrap">EGP {product.price.toFixed(2)}</p>
+    <Link href={`/product/${product.id}`} className="group w-full max-w-sm block">
+      <Card
+        className={cn(
+          'w-full overflow-hidden rounded-lg border-none shadow-sm transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-2 bg-card'
+        )}
+        style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'backwards' }}
+      >
+        <CardContent className="p-3">
+          <div className="aspect-square relative overflow-hidden rounded-sm">
+            <Image
+              src={product.imageUrl}
+              alt={product.name}
+              fill
+              className="object-cover transition-transform duration-300 ease-in-out"
+              style={{ borderRadius: '4px' }}
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            />
           </div>
-          <p className="text-sm text-muted-foreground mt-1 h-10 overflow-hidden group-hover:h-auto transition-all duration-300 ease-in-out">
-            {product.description}
-          </p>
-           <Button onClick={handleAddToCart} className="w-full mt-4">
-            <ShoppingCart className="mr-2 h-4 w-4" /> Add to Cart
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+          <div className="pt-3 text-left">
+            <div className="flex items-start justify-between">
+              <h3 className="font-medium text-base text-foreground pr-2">{product.name}</h3>
+              <p className="text-md font-semibold text-primary whitespace-nowrap">EGP {product.price.toFixed(2)}</p>
+            </div>
+            <p className="text-sm text-muted-foreground mt-1 h-10 overflow-hidden">
+              {product.description}
+            </p>
+            <Button onClick={handleAddToCart} className="w-full mt-4">
+              <ShoppingCart className="mr-2 h-4 w-4" /> Add to Cart
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
   );
 }

@@ -42,12 +42,10 @@ export function Header() {
 
   return (
     <header className="px-4 lg:px-6 h-16 flex items-center shadow-sm sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
-      <div className="flex-1">
-        <Link href="/" className="flex items-center gap-2" prefetch={false}>
-          <Image src="https://s6.imgcdn.dev/Yscgi0.png" alt="Rosabella Logo" width={70} height={70} />
-        </Link>
-      </div>
-      <nav className="flex gap-4 sm:gap-6 items-center">
+      <Link href="/" className="flex items-center justify-center" prefetch={false}>
+        <Image src="https://s6.imgcdn.dev/Yscgi0.png" alt="Rosabella Logo" width={70} height={70} />
+      </Link>
+      <nav className="ml-auto flex gap-4 sm:gap-6 items-center">
         <Button variant="ghost" asChild>
           <Link
             href="/"
@@ -65,7 +63,7 @@ export function Header() {
             aria-label="Facebook page"
             prefetch={false}
           >
-            Follow us on Facebook
+            Facebook
           </Link>
         </Button>
         <Sheet>
