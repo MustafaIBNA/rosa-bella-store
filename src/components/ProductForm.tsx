@@ -27,7 +27,7 @@ const formSchema = z.object({
   imageFile: z.instanceof(File).optional(),
 }).refine(data => data.imageUrl || data.imageFile, {
   message: 'Either an image URL or an image file is required.',
-  path: ['imageUrl'],
+  path: ['imageFile'],
 });
 
 
@@ -82,8 +82,7 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      form.setValue('imageFile', file);
-      // Clear the imageUrl if a new file is selected to avoid validation conflicts
+      form.setValue('imageFile', file, { shouldValidate: true });
       form.setValue('imageUrl', ''); 
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -104,18 +103,17 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
 
   const onSubmit = async (data: ProductFormValues) => {
     setIsSubmitting(true);
-    let finalImageUrl = productToEdit?.imageUrl || '';
-
+    
     try {
+      let finalImageUrl = productToEdit?.imageUrl || data.imageUrl || '';
+
       if (data.imageFile) {
         toast({ title: 'Uploading Image...', description: 'Please wait while we upload your new image.' });
         finalImageUrl = await uploadImage(data.imageFile);
-      } else if (data.imageUrl) {
-        finalImageUrl = data.imageUrl;
-      }
+      } 
 
       if (!finalImageUrl) {
-        throw new Error("Image is required.");
+        throw new Error("Image is required. Please upload an image or provide a URL.");
       }
 
       const formattedData = {
@@ -204,35 +202,41 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
             )}
           />
         </div>
-        <FormItem>
-            <FormLabel>Product Image</FormLabel>
-            <FormControl>
-                <Input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    ref={fileInputRef}
-                    onChange={handleImageChange}
-                />
-            </FormControl>
-            <div
-                className="w-full h-48 border-2 border-dashed border-muted rounded-lg flex items-center justify-center text-muted-foreground cursor-pointer hover:bg-muted/50 transition-colors"
-                onClick={() => fileInputRef.current?.click()}
-            >
-                {imagePreview ? (
-                    <div className="relative w-full h-full">
-                        <Image src={imagePreview} alt="Product preview" fill className="object-contain rounded-md" />
-                    </div>
-                ) : (
-                    <div className="text-center">
-                        <Upload className="mx-auto h-8 w-8" />
-                        <p>Click to upload an image</p>
-                        <p className="text-xs">PNG, JPG, GIF up to 10MB</p>
-                    </div>
-                )}
-            </div>
-            <FormMessage>{form.formState.errors.imageFile?.message || form.formState.errors.imageUrl?.message}</FormMessage>
-        </FormItem>
+        <FormField
+          control={form.control}
+          name="imageFile"
+          render={() => (
+            <FormItem>
+                <FormLabel>Product Image</FormLabel>
+                <FormControl>
+                    <Input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        ref={fileInputRef}
+                        onChange={handleImageChange}
+                    />
+                </FormControl>
+                <div
+                    className="w-full h-48 border-2 border-dashed border-muted rounded-lg flex items-center justify-center text-muted-foreground cursor-pointer hover:bg-muted/50 transition-colors"
+                    onClick={() => fileInputRef.current?.click()}
+                >
+                    {imagePreview ? (
+                        <div className="relative w-full h-full">
+                            <Image src={imagePreview} alt="Product preview" fill className="object-contain rounded-md" />
+                        </div>
+                    ) : (
+                        <div className="text-center">
+                            <Upload className="mx-auto h-8 w-8" />
+                            <p>Click to upload an image</p>
+                            <p className="text-xs">PNG, JPG, GIF up to 10MB</p>
+                        </div>
+                    )}
+                </div>
+                <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <div className="flex justify-end pt-4">
           <Button type="submit" disabled={isSubmitting}>
