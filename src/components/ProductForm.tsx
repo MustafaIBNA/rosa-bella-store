@@ -107,8 +107,7 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
     const fileName = `${uuidv4()}.${fileExtension}`;
     const storageRef = ref(storage, `products/${fileName}`);
     await uploadBytes(storageRef, compressedFile);
-    const downloadURL = await getDownloadURL(storageRef);
-    return downloadURL;
+    return getDownloadURL(storageRef);
   };
 
   const onSubmit = async (data: ProductFormValues) => {
