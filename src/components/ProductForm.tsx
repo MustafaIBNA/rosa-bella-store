@@ -22,10 +22,14 @@ const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   description: z.string().min(10, { message: 'Description must be at least 10 characters.' }),
   price: z.coerce.number().positive({ message: 'Price must be a positive number.' }),
-  imageUrl: z.string().url({ message: 'Please enter a valid image URL.' }),
+  imageUrl: z.string().url({ message: 'Please enter a valid image URL.' }).optional().or(z.literal('')),
   category: z.string().min(1, { message: 'Category is required.' }),
   imageFile: z.instanceof(File).optional(),
+}).refine(data => data.imageUrl || data.imageFile, {
+  message: 'Either an image URL or an image file is required.',
+  path: ['imageUrl'],
 });
+
 
 type ProductFormValues = z.infer<typeof formSchema>;
 
@@ -79,6 +83,8 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
     const file = event.target.files?.[0];
     if (file) {
       form.setValue('imageFile', file);
+      // Clear the imageUrl if a new file is selected to avoid validation conflicts
+      form.setValue('imageUrl', ''); 
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
@@ -98,12 +104,18 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
 
   const onSubmit = async (data: ProductFormValues) => {
     setIsSubmitting(true);
-    let imageUrl = data.imageUrl;
+    let finalImageUrl = productToEdit?.imageUrl || '';
 
     try {
       if (data.imageFile) {
         toast({ title: 'Uploading Image...', description: 'Please wait while we upload your new image.' });
-        imageUrl = await uploadImage(data.imageFile);
+        finalImageUrl = await uploadImage(data.imageFile);
+      } else if (data.imageUrl) {
+        finalImageUrl = data.imageUrl;
+      }
+
+      if (!finalImageUrl) {
+        throw new Error("Image is required.");
       }
 
       const formattedData = {
@@ -111,7 +123,7 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
         description: data.description,
         price: data.price,
         category: data.category.trim().charAt(0).toUpperCase() + data.category.trim().slice(1).toLowerCase(),
-        imageUrl: imageUrl,
+        imageUrl: finalImageUrl,
       };
 
       if (productToEdit) {
@@ -124,10 +136,11 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
       onFinished();
     } catch (error) {
       console.error("Error submitting form:", error);
+      const errorMessage = error instanceof Error ? error.message : "An error occurred while saving the product. Please try again.";
       toast({
         variant: "destructive",
         title: "Submission Failed",
-        description: "An error occurred while saving the product. Please try again.",
+        description: errorMessage,
       });
     } finally {
       setIsSubmitting(false);
@@ -218,7 +231,7 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
                     </div>
                 )}
             </div>
-            <FormMessage>{form.formState.errors.imageFile?.message}</FormMessage>
+            <FormMessage>{form.formState.errors.imageFile?.message || form.formState.errors.imageUrl?.message}</FormMessage>
         </FormItem>
 
         <div className="flex justify-end pt-4">
