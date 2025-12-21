@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { v4 as uuidv4 } from 'uuid';
+import imageCompression from 'browser-image-compression';
 
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -92,11 +93,20 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
     }
   };
 
-  const uploadImage = async (file: File): Promise<string> => {
-    const fileExtension = file.name.split('.').pop();
+  const compressAndUploadImage = async (file: File): Promise<string> => {
+    toast({ title: 'Compressing Image...', description: 'Preparing your image for upload.' });
+    const options = {
+      maxSizeMB: 1,
+      maxWidthOrHeight: 1920,
+      useWebWorker: true,
+    };
+    const compressedFile = await imageCompression(file, options);
+
+    toast({ title: 'Uploading Image...', description: 'Please wait while we upload your new image.' });
+    const fileExtension = compressedFile.name.split('.').pop();
     const fileName = `${uuidv4()}.${fileExtension}`;
     const storageRef = ref(storage, `products/${fileName}`);
-    await uploadBytes(storageRef, file);
+    await uploadBytes(storageRef, compressedFile);
     const downloadURL = await getDownloadURL(storageRef);
     return downloadURL;
   };
@@ -107,18 +117,14 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
     try {
       let finalImageUrl = productToEdit?.imageUrl || '';
 
-      // Step 1: Upload image if a new one is provided
       if (data.imageFile) {
-        toast({ title: 'Uploading Image...', description: 'Please wait while we upload your new image.' });
-        finalImageUrl = await uploadImage(data.imageFile);
+        finalImageUrl = await compressAndUploadImage(data.imageFile);
       }
 
-      // Step 2: Ensure there is an image URL to save
       if (!finalImageUrl) {
         throw new Error("Image is required. Please upload an image or provide a URL.");
       }
 
-      // Step 3: Prepare the product data
       const formattedData = {
         name: data.name,
         description: data.description,
@@ -127,7 +133,6 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
         imageUrl: finalImageUrl,
       };
 
-      // Step 4: Save the product data to Firestore
       if (productToEdit) {
         editProduct({ ...productToEdit, ...formattedData });
         toast({ title: 'Product Updated', description: `"${formattedData.name}" has been successfully updated.` });
@@ -146,7 +151,6 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
         description: errorMessage,
       });
     } finally {
-      // Step 5: Always reset the submitting state
       setIsSubmitting(false);
     }
   };
