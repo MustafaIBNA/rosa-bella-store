@@ -105,17 +105,20 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
     setIsSubmitting(true);
     
     try {
-      let finalImageUrl = productToEdit?.imageUrl || data.imageUrl || '';
+      let finalImageUrl = productToEdit?.imageUrl || '';
 
+      // Step 1: Upload image if a new one is provided
       if (data.imageFile) {
         toast({ title: 'Uploading Image...', description: 'Please wait while we upload your new image.' });
         finalImageUrl = await uploadImage(data.imageFile);
-      } 
+      }
 
+      // Step 2: Ensure there is an image URL to save
       if (!finalImageUrl) {
         throw new Error("Image is required. Please upload an image or provide a URL.");
       }
 
+      // Step 3: Prepare the product data
       const formattedData = {
         name: data.name,
         description: data.description,
@@ -124,6 +127,7 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
         imageUrl: finalImageUrl,
       };
 
+      // Step 4: Save the product data to Firestore
       if (productToEdit) {
         editProduct({ ...productToEdit, ...formattedData });
         toast({ title: 'Product Updated', description: `"${formattedData.name}" has been successfully updated.` });
@@ -131,6 +135,7 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
         addProduct(formattedData);
         toast({ title: 'Product Added', description: `"${formattedData.name}" has been successfully added.` });
       }
+      
       onFinished();
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -141,6 +146,7 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
         description: errorMessage,
       });
     } finally {
+      // Step 5: Always reset the submitting state
       setIsSubmitting(false);
     }
   };
@@ -215,11 +221,12 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
                         className="hidden"
                         ref={fileInputRef}
                         onChange={handleImageChange}
+                        disabled={isSubmitting}
                     />
                 </FormControl>
                 <div
                     className="w-full h-48 border-2 border-dashed border-muted rounded-lg flex items-center justify-center text-muted-foreground cursor-pointer hover:bg-muted/50 transition-colors"
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={() => !isSubmitting && fileInputRef.current?.click()}
                 >
                     {imagePreview ? (
                         <div className="relative w-full h-full">
