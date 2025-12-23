@@ -5,25 +5,22 @@ import {
   useFirestore,
   useCollection,
   useMemoFirebase,
-  addDocumentNonBlocking,
-  updateDocumentNonBlocking,
-  deleteDocumentNonBlocking,
 } from '@/firebase';
-import { collection, doc } from 'firebase/firestore';
+import { collection, doc, addDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 
 interface ProductContextType {
   products: Product[];
-  addProduct: (product: Omit<Product, 'id'>) => void;
-  editProduct: (product: Product) => void;
-  deleteProduct: (id: string) => void;
+  addProduct: (product: Omit<Product, 'id'>) => Promise<void>;
+  editProduct: (product: Product) => Promise<void>;
+  deleteProduct: (id: string) => Promise<void>;
   isLoading: boolean;
 }
 
 export const ProductContext = createContext<ProductContextType>({
   products: [],
-  addProduct: () => {},
-  editProduct: () => {},
-  deleteProduct: () => {},
+  addProduct: async () => {},
+  editProduct: async () => {},
+  deleteProduct: async () => {},
   isLoading: true,
 });
 
@@ -37,22 +34,22 @@ export function ProductProvider({ children }: { children: ReactNode }) {
 
   const { data: products, isLoading } = useCollection<Product>(productsCollection);
 
-  const addProduct = (product: Omit<Product, 'id'>) => {
+  const addProduct = async (product: Omit<Product, 'id'>) => {
     if (!productsCollection) return;
-    addDocumentNonBlocking(productsCollection, product);
+    await addDoc(productsCollection, product);
   };
 
-  const editProduct = (updatedProduct: Product) => {
+  const editProduct = async (updatedProduct: Product) => {
     if (!firestore) return;
     const { id, ...data } = updatedProduct;
     const productRef = doc(firestore, 'products', id);
-    updateDocumentNonBlocking(productRef, data);
+    await updateDoc(productRef, data);
   };
 
-  const deleteProduct = (id: string) => {
+  const deleteProduct = async (id: string) => {
     if (!firestore) return;
     const productRef = doc(firestore, 'products', id);
-    deleteDocumentNonBlocking(productRef);
+    await deleteDoc(productRef);
   };
 
   const value = useMemo(

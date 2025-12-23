@@ -25,7 +25,6 @@ const formSchema = z.object({
   description: z.string().min(10, { message: 'Description must be at least 10 characters.' }),
   price: z.coerce.number().positive({ message: 'Price must be a positive number.' }),
   category: z.string().min(1, { message: 'Category is required.' }),
-  // Image is optional in the schema because we handle validation logic in the submit function
   imageFile: z.instanceof(File).optional(),
 });
 
@@ -35,6 +34,33 @@ interface ProductFormProps {
   productToEdit: Product | null;
   onFinished: () => void;
 }
+
+// Helper function to handle image compression and upload
+const compressAndUploadImage = async (file: File, storage: any, toast: any): Promise<string> => {
+  toast({ title: 'Compressing Image...', description: 'Preparing your image for upload.' });
+  try {
+    const options = {
+      maxSizeMB: 1,
+      maxWidthOrHeight: 1920,
+      useWebWorker: true,
+    };
+    const compressedFile = await imageCompression(file, options);
+
+    toast({ title: 'Uploading Image...', description: 'Please wait while we upload your new image.' });
+    const fileExtension = compressedFile.name.split('.').pop() || 'jpg';
+    const fileName = `${uuidv4()}.${fileExtension}`;
+    const storageRef = ref(storage, `products/${fileName}`);
+    
+    const uploadTask = await uploadBytes(storageRef, compressedFile);
+    const downloadURL = await getDownloadURL(uploadTask.ref);
+    
+    return downloadURL;
+  } catch (error) {
+      console.error("Image upload failed:", error);
+      throw new Error("Could not upload the image. Please try again.");
+  }
+};
+
 
 export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
   const { addProduct, editProduct } = useContext(ProductContext);
@@ -56,7 +82,6 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
     },
   });
 
-  // Effect to populate the form when a product is selected for editing
   useEffect(() => {
     if (productToEdit) {
       form.reset({
@@ -91,50 +116,20 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
     }
   };
   
-  // Helper function to handle image compression and upload
-  const compressAndUploadImage = async (file: File): Promise<string> => {
-    toast({ title: 'Compressing Image...', description: 'Preparing your image for upload.' });
-    try {
-      const options = {
-        maxSizeMB: 1,
-        maxWidthOrHeight: 1920,
-        useWebWorker: true,
-      };
-      const compressedFile = await imageCompression(file, options);
-  
-      toast({ title: 'Uploading Image...', description: 'Please wait while we upload your new image.' });
-      const fileExtension = compressedFile.name.split('.').pop() || 'jpg';
-      const fileName = `${uuidv4()}.${fileExtension}`;
-      const storageRef = ref(storage, `products/${fileName}`);
-      
-      const uploadTask = await uploadBytes(storageRef, compressedFile);
-      const downloadURL = await getDownloadURL(uploadTask.ref);
-      
-      return downloadURL;
-    } catch (error) {
-        console.error("Image upload failed:", error);
-        throw new Error("Could not upload the image. Please try again.");
-    }
-  };
-
-
   const onSubmit = async (data: ProductFormValues) => {
     setIsSubmitting(true);
-    let finalImageUrl = productToEdit?.imageUrl; // Default to existing image if editing
+    let finalImageUrl = productToEdit?.imageUrl; 
 
     try {
-      // Step 1: Handle image upload if a new file is provided
       if (data.imageFile) {
-        finalImageUrl = await compressAndUploadImage(data.imageFile);
+        finalImageUrl = await compressAndUploadImage(data.imageFile, storage, toast);
       }
 
-      // Step 2: Validate that an image URL exists (either new or existing)
       if (!finalImageUrl) {
         form.setError("imageFile", { type: "manual", message: "An image is required." });
         throw new Error("Image is required.");
       }
 
-      // Step 3: Prepare product data for Firestore
       const productData = {
         name: data.name,
         description: data.description,
@@ -143,16 +138,14 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
         imageUrl: finalImageUrl,
       };
 
-      // Step 4: Save data to Firestore
       if (productToEdit) {
-        editProduct({ ...productToEdit, ...productData });
+        await editProduct({ ...productToEdit, ...productData });
         toast({ title: 'Product Updated', description: `"${productData.name}" has been successfully updated.` });
       } else {
-        addProduct(productData);
+        await addProduct(productData);
         toast({ title: 'Product Added', description: `"${productData.name}" has been successfully added.` });
       }
       
-      // Step 5: Finalize and close the form
       onFinished();
 
     } catch (error) {
@@ -164,7 +157,7 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
         description: errorMessage,
       });
     } finally {
-      // CRUCIAL: This block ensures the loading state is always turned off.
+      // This block is CRUCIAL. It guarantees the loading state is turned off.
       setIsSubmitting(false);
     }
   };
