@@ -1,12 +1,9 @@
 'use client';
 
-import { useContext, useEffect, useState, useRef } from 'react';
+import { useContext, useEffect, useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { v4 as uuidv4 } from 'uuid';
-import imageCompression from 'browser-image-compression';
 
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -15,11 +12,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { ProductContext } from '@/context/ProductContext';
 import { useToast } from '@/hooks/use-toast';
 import type { Product } from '@/lib/types';
-import Image from 'next/image';
-import { useFirebaseApp } from '@/firebase';
-import { Upload } from 'lucide-react';
+import { ImageUploader } from './ImageUploader';
+import { useUpload } from '@/hooks/use-upload';
 
-// Define the validation schema for the form
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   description: z.string().min(10, { message: 'Description must be at least 10 characters.' }),
@@ -35,99 +30,79 @@ interface ProductFormProps {
   onFinished: () => void;
 }
 
-// Helper function to handle image compression and upload
-const compressAndUploadImage = async (file: File, storage: any, toast: any): Promise<string> => {
-  toast({ title: 'Compressing Image...', description: 'Preparing your image for upload.' });
-  try {
-    const options = {
-      maxSizeMB: 1,
-      maxWidthOrHeight: 1920,
-      useWebWorker: true,
-    };
-    const compressedFile = await imageCompression(file, options);
-
-    toast({ title: 'Uploading Image...', description: 'Please wait while we upload your new image.' });
-    const fileExtension = compressedFile.name.split('.').pop() || 'jpg';
-    const fileName = `${uuidv4()}.${fileExtension}`;
-    const storageRef = ref(storage, `products/${fileName}`);
-    
-    const uploadTask = await uploadBytes(storageRef, compressedFile);
-    const downloadURL = await getDownloadURL(uploadTask.ref);
-    
-    return downloadURL;
-  } catch (error) {
-      console.error("Image upload failed:", error);
-      throw new Error("Could not upload the image. Please try again.");
-  }
-};
-
-
 export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
   const { addProduct, editProduct } = useContext(ProductContext);
   const { toast } = useToast();
-  const firebaseApp = useFirebaseApp();
-  const storage = getStorage(firebaseApp);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+
+  const initialImageUrl = useMemo(() => productToEdit?.imageUrl || null, [productToEdit]);
+  
+  const {
+    upload,
+    isUploading,
+    error: uploadError,
+    downloadURL,
+  } = useUpload();
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: '',
-      description: '',
-      price: 0,
-      category: '',
-      imageFile: undefined,
-    },
+    defaultValues: productToEdit
+      ? {
+          name: productToEdit.name,
+          description: productToEdit.description,
+          price: productToEdit.price,
+          category: productToEdit.category,
+        }
+      : {
+          name: '',
+          description: '',
+          price: 0,
+          category: '',
+        },
   });
 
   useEffect(() => {
-    if (productToEdit) {
-      form.reset({
-        name: productToEdit.name,
-        description: productToEdit.description,
-        price: productToEdit.price,
-        category: productToEdit.category,
-        imageFile: undefined,
-      });
-      setImagePreview(productToEdit.imageUrl);
-    } else {
-      form.reset({
-        name: '',
-        description: '',
-        price: 0,
-        category: '',
-        imageFile: undefined,
-      });
-      setImagePreview(null);
-    }
+    form.reset(
+      productToEdit
+        ? {
+            name: productToEdit.name,
+            description: productToEdit.description,
+            price: productToEdit.price,
+            category: productToEdit.category,
+          }
+        : {
+            name: '',
+            description: '',
+            price: 0,
+            category: '',
+          }
+    );
+    setImageFile(null);
   }, [productToEdit, form]);
 
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      form.setValue('imageFile', file, { shouldValidate: true });
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-  
   const onSubmit = async (data: ProductFormValues) => {
     setIsSubmitting(true);
-    let finalImageUrl = productToEdit?.imageUrl; 
-
+    
     try {
-      if (data.imageFile) {
-        finalImageUrl = await compressAndUploadImage(data.imageFile, storage, toast);
+      let finalImageUrl = productToEdit?.imageUrl;
+
+      // 1. If a new image file is present, upload it.
+      if (imageFile) {
+        finalImageUrl = await upload(imageFile);
+        if (!finalImageUrl) {
+            throw new Error(uploadError || "Image upload failed to return a URL.");
+        }
       }
 
+      // 2. An image must exist for both new and existing products.
       if (!finalImageUrl) {
-        form.setError("imageFile", { type: "manual", message: "An image is required." });
-        throw new Error("Image is required.");
+        toast({
+          variant: 'destructive',
+          title: 'Image Required',
+          description: 'Please select an image for the product.',
+        });
+        return; 
       }
 
       const productData = {
@@ -138,6 +113,7 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
         imageUrl: finalImageUrl,
       };
 
+      // 3. Save the product data to Firestore.
       if (productToEdit) {
         await editProduct({ ...productToEdit, ...productData });
         toast({ title: 'Product Updated', description: `"${productData.name}" has been successfully updated.` });
@@ -157,14 +133,24 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
         description: errorMessage,
       });
     } finally {
-      // This block is CRUCIAL. It guarantees the loading state is turned off.
+      // 4. CRUCIAL: This guarantees the loading state is always turned off.
       setIsSubmitting(false);
     }
   };
+  
+  const isFormBusy = isSubmitting || isUploading;
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+        <ImageUploader 
+            initialImageUrl={initialImageUrl}
+            onFileSelect={setImageFile}
+            isUploading={isUploading}
+            disabled={isFormBusy}
+        />
+        {uploadError && <FormMessage className='text-destructive'>{uploadError}</FormMessage>}
+        
         <FormField
           control={form.control}
           name="name"
@@ -172,7 +158,7 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
             <FormItem>
               <FormLabel>Product Name</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., Lavender Dream Candle" {...field} disabled={isSubmitting} />
+                <Input placeholder="e.g., Lavender Dream Candle" {...field} disabled={isFormBusy} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -185,7 +171,7 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
-                <Textarea placeholder="Describe the product..." {...field} disabled={isSubmitting} />
+                <Textarea placeholder="Describe the product..." {...field} disabled={isFormBusy} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -199,7 +185,7 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
               <FormItem>
                 <FormLabel>Price (EGP)</FormLabel>
                 <FormControl>
-                  <Input type="number" step="0.01" placeholder="e.g., 24.99" {...field} disabled={isSubmitting} />
+                  <Input type="number" step="0.01" placeholder="e.g., 24.99" {...field} disabled={isFormBusy} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -212,55 +198,17 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
               <FormItem>
                 <FormLabel>Category</FormLabel>
                 <FormControl>
-                  <Input placeholder="e.g., Candle" {...field} disabled={isSubmitting} />
+                  <Input placeholder="e.g., Candle" {...field} disabled={isFormBusy} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
-        <FormField
-          control={form.control}
-          name="imageFile"
-          render={({ field }) => (
-            <FormItem>
-                <FormLabel>Product Image</FormLabel>
-                <FormControl>
-                    <Input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        ref={fileInputRef}
-                        onChange={handleImageChange}
-                        disabled={isSubmitting}
-                    />
-                </FormControl>
-                <div
-                    className="w-full h-48 border-2 border-dashed border-muted rounded-lg flex items-center justify-center text-muted-foreground cursor-pointer hover:bg-muted/50 transition-colors"
-                    onClick={() => !isSubmitting && fileInputRef.current?.click()}
-                    role="button"
-                    aria-label="Upload product image"
-                >
-                    {imagePreview ? (
-                        <div className="relative w-full h-full">
-                            <Image src={imagePreview} alt="Product preview" fill className="object-contain rounded-md" />
-                        </div>
-                    ) : (
-                        <div className="text-center">
-                            <Upload className="mx-auto h-8 w-8" />
-                            <p>Click to upload an image</p>
-                            <p className="text-xs">PNG, JPG, GIF up to 10MB</p>
-                        </div>
-                    )}
-                </div>
-                 <FormMessage>{form.formState.errors.imageFile?.message}</FormMessage>
-            </FormItem>
-          )}
-        />
 
         <div className="flex justify-end pt-4">
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Saving...' : (productToEdit ? 'Save Changes' : 'Create Product')}
+          <Button type="submit" disabled={isFormBusy}>
+            {isSubmitting ? 'Saving...' : (isUploading ? 'Uploading...' : (productToEdit ? 'Save Changes' : 'Create Product'))}
           </Button>
         </div>
       </form>
