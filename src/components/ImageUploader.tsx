@@ -11,7 +11,7 @@ interface ImageUploaderProps {
   initialImageUrl: string | null;
   onFileSelect: (file: File | null) => void;
   isUploading: boolean;
-  progress: number; // New prop for real progress
+  progress: number;
   disabled: boolean;
 }
 
@@ -26,7 +26,10 @@ export function ImageUploader({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    setPreview(initialImageUrl);
+    // Only update preview from initialImageUrl if there's no new file selected
+    if (!fileInputRef.current?.files?.length) {
+      setPreview(initialImageUrl);
+    }
   }, [initialImageUrl]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,6 +41,9 @@ export function ImageUploader({
         setPreview(reader.result as string);
       };
       reader.readAsDataURL(file);
+    } else {
+      // If file is cleared, revert to initial image url if it exists
+      setPreview(initialImageUrl);
     }
   };
 

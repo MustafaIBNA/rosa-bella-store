@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useContext, useEffect, useState, useMemo } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -36,47 +36,26 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
 
-  const initialImageUrl = useMemo(() => productToEdit?.imageUrl || null, [productToEdit]);
-  
-  const {
-    upload,
-    isUploading,
-    error: uploadError,
-    progress,
-  } = useUpload();
+  const { upload, isUploading, progress, error: uploadError } = useUpload();
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: productToEdit
-      ? {
-          name: productToEdit.name,
-          description: productToEdit.description,
-          price: productToEdit.price,
-          category: productToEdit.category,
-        }
-      : {
-          name: '',
-          description: '',
-          price: 0,
-          category: '',
-        },
+    defaultValues: productToEdit || {
+      name: '',
+      description: '',
+      price: 0,
+      category: '',
+    },
   });
 
   useEffect(() => {
     form.reset(
-      productToEdit
-        ? {
-            name: productToEdit.name,
-            description: productToEdit.description,
-            price: productToEdit.price,
-            category: productToEdit.category,
-          }
-        : {
-            name: '',
-            description: '',
-            price: 0,
-            category: '',
-          }
+      productToEdit || {
+        name: '',
+        description: '',
+        price: 0,
+        category: '',
+      }
     );
     setImageFile(null);
   }, [productToEdit, form]);
@@ -87,21 +66,20 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
     try {
       let finalImageUrl = productToEdit?.imageUrl;
 
+      // If a new image file is selected, upload it.
       if (imageFile) {
-        finalImageUrl = await upload(imageFile);
-        if (!finalImageUrl) {
-          throw new Error(uploadError || "Image upload failed to return a URL.");
-        }
+        const downloadURL = await upload(imageFile);
+        finalImageUrl = downloadURL;
       }
 
+      // If there's still no image URL (neither pre-existing nor newly uploaded), show an error.
       if (!finalImageUrl) {
         toast({
           variant: 'destructive',
           title: 'Image Required',
           description: 'Please select an image for the product.',
         });
-        setIsSubmitting(false); // Ensure submission state is reset
-        return; 
+        return; // Stop submission
       }
 
       const productData = {
@@ -123,14 +101,19 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
       onFinished();
 
     } catch (error) {
+      // The `useUpload` hook already shows a toast for upload errors.
+      // We can add a generic one here for other potential failures.
       console.error("Error submitting product form:", error);
-      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
-      toast({
-        variant: "destructive",
-        title: "Submission Failed",
-        description: errorMessage,
-      });
+      if (!uploadError) { // Only show this if the upload hook hasn't already shown an error
+          const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred during submission.";
+          toast({
+            variant: "destructive",
+            title: "Submission Failed",
+            description: errorMessage,
+          });
+      }
     } finally {
+      // This block is crucial and will always run, whether the try block succeeds or fails.
       setIsSubmitting(false);
     }
   };
@@ -141,13 +124,13 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
         <ImageUploader 
-            initialImageUrl={initialImageUrl}
+            initialImageUrl={productToEdit?.imageUrl || null}
             onFileSelect={setImageFile}
             isUploading={isUploading}
             progress={progress}
             disabled={isFormBusy}
         />
-        {uploadError && <FormMessage className='text-destructive'>{uploadError}</FormMessage>}
+        {uploadError && <p className='text-sm font-medium text-destructive'>{uploadError}</p>}
         
         <FormField
           control={form.control}
@@ -206,7 +189,7 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
 
         <div className="flex justify-end pt-4">
           <Button type="submit" disabled={isFormBusy}>
-            {isSubmitting ? 'Saving...' : (isUploading ? `Uploading (${Math.round(progress)}%)...` : (productToEdit ? 'Save Changes' : 'Create Product'))}
+            {isSubmitting ? 'Saving...' : (isUploading ? `Uploading...` : (productToEdit ? 'Save Changes' : 'Create Product'))}
           </Button>
         </div>
       </form>
