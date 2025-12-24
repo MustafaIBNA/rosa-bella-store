@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useContext, useEffect, useState, useMemo } from 'react';
@@ -20,7 +21,6 @@ const formSchema = z.object({
   description: z.string().min(10, { message: 'Description must be at least 10 characters.' }),
   price: z.coerce.number().positive({ message: 'Price must be a positive number.' }),
   category: z.string().min(1, { message: 'Category is required.' }),
-  imageFile: z.instanceof(File).optional(),
 });
 
 type ProductFormValues = z.infer<typeof formSchema>;
@@ -42,7 +42,7 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
     upload,
     isUploading,
     error: uploadError,
-    downloadURL,
+    progress,
   } = useUpload();
 
   const form = useForm<ProductFormValues>({
@@ -87,21 +87,20 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
     try {
       let finalImageUrl = productToEdit?.imageUrl;
 
-      // 1. If a new image file is present, upload it.
       if (imageFile) {
         finalImageUrl = await upload(imageFile);
         if (!finalImageUrl) {
-            throw new Error(uploadError || "Image upload failed to return a URL.");
+          throw new Error(uploadError || "Image upload failed to return a URL.");
         }
       }
 
-      // 2. An image must exist for both new and existing products.
       if (!finalImageUrl) {
         toast({
           variant: 'destructive',
           title: 'Image Required',
           description: 'Please select an image for the product.',
         });
+        setIsSubmitting(false); // Ensure submission state is reset
         return; 
       }
 
@@ -113,7 +112,6 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
         imageUrl: finalImageUrl,
       };
 
-      // 3. Save the product data to Firestore.
       if (productToEdit) {
         await editProduct({ ...productToEdit, ...productData });
         toast({ title: 'Product Updated', description: `"${productData.name}" has been successfully updated.` });
@@ -133,7 +131,6 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
         description: errorMessage,
       });
     } finally {
-      // 4. CRUCIAL: This guarantees the loading state is always turned off.
       setIsSubmitting(false);
     }
   };
@@ -147,6 +144,7 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
             initialImageUrl={initialImageUrl}
             onFileSelect={setImageFile}
             isUploading={isUploading}
+            progress={progress}
             disabled={isFormBusy}
         />
         {uploadError && <FormMessage className='text-destructive'>{uploadError}</FormMessage>}
@@ -208,7 +206,7 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
 
         <div className="flex justify-end pt-4">
           <Button type="submit" disabled={isFormBusy}>
-            {isSubmitting ? 'Saving...' : (isUploading ? 'Uploading...' : (productToEdit ? 'Save Changes' : 'Create Product'))}
+            {isSubmitting ? 'Saving...' : (isUploading ? `Uploading (${Math.round(progress)}%)...` : (productToEdit ? 'Save Changes' : 'Create Product'))}
           </Button>
         </div>
       </form>

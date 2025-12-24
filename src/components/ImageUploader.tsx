@@ -11,6 +11,7 @@ interface ImageUploaderProps {
   initialImageUrl: string | null;
   onFileSelect: (file: File | null) => void;
   isUploading: boolean;
+  progress: number; // New prop for real progress
   disabled: boolean;
 }
 
@@ -18,13 +19,13 @@ export function ImageUploader({
   initialImageUrl,
   onFileSelect,
   isUploading,
+  progress,
   disabled,
 }: ImageUploaderProps) {
   const [preview, setPreview] = useState<string | null>(initialImageUrl);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    // When the product being edited changes, update the preview
     setPreview(initialImageUrl);
   }, [initialImageUrl]);
 
@@ -101,8 +102,8 @@ export function ImageUploader({
         </div>
         {isUploading && (
              <div className="space-y-1">
-                 <p className="text-sm text-muted-foreground">Uploading...</p>
-                 <Progress value={isUploading ? 50 : 0} className="h-2" />
+                 <p className="text-sm text-muted-foreground">Uploading... {Math.round(progress)}%</p>
+                 <Progress value={progress} className="h-2" />
              </div>
         )}
     </div>
