@@ -10,37 +10,32 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-  SheetFooter,
 } from '@/components/ui/sheet';
-import { ShoppingCart, Trash2 } from 'lucide-react';
+import { ShoppingCart } from 'lucide-react';
 import { CartContext } from '@/context/CartContext';
 import { Separator } from './ui/separator';
+import { ScrollArea } from './ui/scroll-area';
 
 export function Header() {
   const { cart, removeFromCart, updateQuantity, clearCart } = useContext(CartContext);
 
   const total = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
-  const generateWhatsAppMessage = () => {
+  const generateOrderMessage = () => {
     const header = `*New Order from Rosabella*\n\n`;
     const items = cart.map(item => (
         `*${item.name}*\n` +
         `Quantity: ${item.quantity}\n` +
-        `Price: $${item.price.toFixed(2)} each`
+        `Price: EGP ${item.price.toFixed(2)} each`
     )).join('\n\n');
-    const footer = `\n\n*Total Amount: $${total.toFixed(2)}*`;
+    const footer = `\n\n*Total Amount: EGP ${total.toFixed(2)}*`;
     const message = header + items + footer;
     return encodeURIComponent(message);
   };
-
-  const handleWhatsAppCheckout = () => {
-    const phoneNumber = '201203141484';
-    const message = generateOrderMessage();
-    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
-    window.open(whatsappUrl, '_blank');
-  };
   
   const itemCount = cart.reduce((acc, item) => acc + item.quantity, 0);
+  const phoneNumber = '201203141484';
+  const whatsappUrl = `https://wa.me/${phoneNumber}?text=${generateOrderMessage()}`;
 
 
   return (
@@ -101,7 +96,7 @@ export function Header() {
                                         />
                                         <div className="flex-1">
                                             <p className="font-medium">{item.name}</p>
-                                            <p className="text-sm text-muted-foreground">${item.price.toFixed(2)}</p>
+                                            <p className="text-sm text-muted-foreground">EGP {item.price.toFixed(2)}</p>
                                             <div className="flex items-center gap-2 mt-2">
                                                 <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => updateQuantity(item.id, item.quantity - 1)}>-</Button>
                                                 <span>{item.quantity}</span>
@@ -119,7 +114,7 @@ export function Header() {
                         <div className="mt-auto p-4 space-y-4">
                             <div className="flex justify-between font-bold text-lg">
                                 <span>Total:</span>
-                                <span>${total.toFixed(2)}</span>
+                                <span>EGP {total.toFixed(2)}</span>
                             </div>
                             <Button
                                 className="w-full bg-[#25D366] hover:bg-[#1EBE57] text-white"
@@ -134,7 +129,7 @@ export function Header() {
                     </>
                 ) : (
                     <div className="flex-1 flex flex-col items-center justify-center text-center">
-                        <ShoppingCartIcon className="w-16 h-16 text-muted-foreground" />
+                        <ShoppingCart className="w-16 h-16 text-muted-foreground" />
                         <p className="mt-4 text-lg font-medium">Your cart is empty</p>
                         <p className="text-sm text-muted-foreground">Add some products to get started!</p>
                     </div>

@@ -42,9 +42,7 @@ export function ProductCard({ product, index }: ProductCardProps) {
     })
   };
 
-
   return (
-<<<<<<< HEAD
     <Link href={`/product/${product.id}`} className="group w-full max-w-sm block">
       <Card
         className={cn(
@@ -63,29 +61,6 @@ export function ProductCard({ product, index }: ProductCardProps) {
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               loading="lazy"
             />
-=======
-    <Card
-      className={cn(
-        'group w-full max-w-sm overflow-hidden rounded-lg border-none shadow-sm transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-2 bg-card'
-      )}
-      style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'backwards' }}
-    >
-      <CardContent className="p-3">
-        <div className="aspect-square relative overflow-hidden rounded-sm">
-          <Image
-            src={product.imageUrl}
-            alt={product.name}
-            fill
-            className="object-cover transition-transform duration-300 ease-in-out"
-            style={{ borderRadius: '4px' }}
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          />
-        </div>
-        <div className="pt-3 text-left">
-          <div className="flex items-start justify-between">
-            <h3 className="font-medium text-base text-foreground pr-2">{product.name}</h3>
-            <p className="text-md font-semibold text-primary whitespace-nowrap">EGP {product.price.toFixed(2)}</p>
->>>>>>> 30d4cda (Fix: WhatsApp checkout message and product card UI)
           </div>
           <div className="pt-3 text-left">
             <div className="flex items-start justify-between">
