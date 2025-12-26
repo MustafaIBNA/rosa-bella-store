@@ -1,40 +1,25 @@
-/**
- * @file Overview
- * This ruleset defines access control for the Artisan Showcase application's product catalog.
- *
- * @corePhilosophy
- * Employs a public-read, admin-write model for the `/products` collection. This allows for open listing and viewing of products while restricting modifications to authorized admins only.
- *
- * @dataStructure
- * Data is stored in a flat `/products` collection.  Each document represents a single product.
- *
- * @keySecurityDecisions
- * - Public Read: The `/products` collection is publicly readable to allow showcasing the products.
- * - Admin-Only Writes: Only authenticated admins are allowed to create, update, or delete products.  There is currently no role-based authentication, so any logged-in user is considered an admin.
- *
- * @denormalizationForAuthorization
- *  There is no denormalization as authentication is provided by the firebase auth.
- */
+
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    /**
-     * @description Controls read and write access to the /products collection, allowing public reads and admin-only writes.
-     * @path /databases/{database}/documents/products/{productId}
-     * @allow (get, list): Any user can view product details.
-     * @allow (create, update, delete): Only authenticated users can modify product data.
-     * @deny (create, update, delete): Unauthenticated users cannot modify product data.
-     * @principle Enforces public read access and restricts write access to authenticated users.
-     */
     match /products/{productId} {
-      allow get, list: if true;
-      allow create, update, delete: if isSignedIn();
+      allow read: if true;
+      allow create, update, delete: if request.auth != null;
+    }
+  }
+}
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Allow public read access to all files
+    match /{allPaths=**} {
+      allow read: if true;
     }
 
-    // Define helper functions
-    function isSignedIn() {
-      return request.auth != null;
+    // Allow authenticated users to write to the 'products' folder
+    match /products/{allPaths=**} {
+      allow write: if request.auth != null;
     }
   }
 }
