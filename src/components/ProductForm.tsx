@@ -66,20 +66,21 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
     try {
       let finalImageUrl = productToEdit?.imageUrl;
 
-      // If a new image file is selected, upload it.
       if (imageFile) {
+        // Await the upload to complete and get the URL
         const downloadURL = await upload(imageFile);
         finalImageUrl = downloadURL;
       }
 
-      // If there's still no image URL (neither pre-existing nor newly uploaded), show an error.
       if (!finalImageUrl) {
         toast({
           variant: 'destructive',
           title: 'Image Required',
           description: 'Please select an image for the product.',
         });
-        return; // Stop submission
+        // We must stop the submission here.
+        // The finally block will reset isSubmitting.
+        return;
       }
 
       const productData = {
@@ -101,10 +102,10 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
       onFinished();
 
     } catch (error) {
-      // The `useUpload` hook already shows a toast for upload errors.
-      // We can add a generic one here for other potential failures.
       console.error("Error submitting product form:", error);
-      if (!uploadError) { // Only show this if the upload hook hasn't already shown an error
+      // The useUpload hook already shows a toast for upload-specific errors.
+      // This will catch other errors, like from the database write.
+      if (!uploadError) {
           const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred during submission.";
           toast({
             variant: "destructive",
@@ -113,7 +114,8 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
           });
       }
     } finally {
-      // This block is crucial and will always run, whether the try block succeeds or fails.
+      // This block is CRITICAL. It guarantees that the form is re-enabled,
+      // preventing the "freezing" issue, even if an error occurred.
       setIsSubmitting(false);
     }
   };
@@ -189,7 +191,7 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
 
         <div className="flex justify-end pt-4">
           <Button type="submit" disabled={isFormBusy}>
-            {isSubmitting ? 'Saving...' : (isUploading ? `Uploading...` : (productToEdit ? 'Save Changes' : 'Create Product'))}
+            {isUploading ? `Uploading...` : (isSubmitting ? 'Saving...' : (productToEdit ? 'Save Changes' : 'Create Product'))}
           </Button>
         </div>
       </form>
