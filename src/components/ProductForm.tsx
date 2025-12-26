@@ -78,8 +78,7 @@ export function ProductForm({ productToEdit, onFinished }: ProductFormProps) {
           title: 'Image Required',
           description: 'Please select an image for the product.',
         });
-        // We must stop the submission here.
-        // The finally block will reset isSubmitting.
+        setIsSubmitting(false);
         return;
       }
 

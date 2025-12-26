@@ -27,7 +27,7 @@ export function useUpload() {
         const err = "No file provided for upload.";
         setError(err);
         setIsUploading(false);
-        reject(err);
+        reject(new Error(err));
         return;
       }
 
