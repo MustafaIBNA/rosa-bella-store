@@ -4,7 +4,7 @@ import { useContext, useState, useMemo } from 'react';
 import { ProductContext } from '@/context/ProductContext';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import Image from 'next/image';
 import { Edit, PlusCircle, Trash2 } from 'lucide-react';
@@ -185,6 +185,9 @@ export function AdminDashboard() {
         <DialogContent className="sm:max-w-[480px]">
           <DialogHeader>
             <DialogTitle className="font-headline">{editingProduct ? 'Edit Product' : 'Add New Product'}</DialogTitle>
+            <DialogDescription>
+              Fill out the form below to add or update a product in your catalog.
+            </DialogDescription>
           </DialogHeader>
           <ProductForm productToEdit={editingProduct} onFinished={onFormFinished} />
         </DialogContent>
