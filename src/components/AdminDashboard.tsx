@@ -1,3 +1,4 @@
+
 'use client';
 import { useContext, useState, useMemo } from 'react';
 import { ProductContext } from '@/context/ProductContext';
@@ -11,9 +12,11 @@ import { ProductForm } from './ProductForm';
 import type { Product } from '@/lib/types';
 import { Skeleton } from './ui/skeleton';
 import { Checkbox } from './ui/checkbox';
+import { useToast } from '@/hooks/use-toast';
 
 export function AdminDashboard() {
   const { products, deleteProduct, deleteMultipleProducts, isLoading } = useContext(ProductContext);
+  const { toast } = useToast();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
@@ -34,12 +37,14 @@ export function AdminDashboard() {
     if (deletingProduct) {
       deleteProduct(deletingProduct.id);
       setDeletingProduct(null);
+      toast({ title: "Product Deleted", description: `"${deletingProduct.name}" has been removed.` });
     }
   };
 
   const handleDeleteMultipleConfirm = async () => {
     if (selectedProducts.length > 0) {
       await deleteMultipleProducts(selectedProducts);
+      toast({ title: "Products Deleted", description: `${selectedProducts.length} products have been removed.` });
       setSelectedProducts([]);
     }
     setShowDeleteMultipleDialog(false);

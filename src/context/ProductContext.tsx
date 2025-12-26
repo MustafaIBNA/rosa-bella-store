@@ -7,7 +7,19 @@ import {
   useCollection,
   useMemoFirebase,
 } from '@/firebase';
-import { collection, doc, addDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import {
+  collection,
+  doc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  writeBatch,
+} from 'firebase/firestore';
+import {
+  addDocumentNonBlocking,
+  updateDocumentNonBlocking,
+  deleteDocumentNonBlocking,
+} from '@/firebase/non-blocking-updates';
 
 interface ProductContextType {
   products: Product[];
@@ -39,29 +51,31 @@ export function ProductProvider({ children }: { children: ReactNode }) {
 
   const addProduct = async (product: Omit<Product, 'id'>) => {
     if (!productsCollection) return;
-    await addDoc(productsCollection, product);
+    addDocumentNonBlocking(productsCollection, product);
   };
 
   const editProduct = async (updatedProduct: Product) => {
     if (!firestore) return;
     const { id, ...data } = updatedProduct;
     const productRef = doc(firestore, 'products', id);
-    await updateDoc(productRef, data);
+    updateDocumentNonBlocking(productRef, data);
   };
 
   const deleteProduct = async (id: string) => {
     if (!firestore) return;
     const productRef = doc(firestore, 'products', id);
-    await deleteDoc(productRef);
+    deleteDocumentNonBlocking(productRef);
   };
 
   const deleteMultipleProducts = async (ids: string[]) => {
     if (!firestore) return;
-    const deletePromises = ids.map(id => {
+    const batch = writeBatch(firestore);
+    ids.forEach(id => {
       const productRef = doc(firestore, 'products', id);
-      return deleteDoc(productRef);
+      batch.delete(productRef);
     });
-    await Promise.all(deletePromises);
+    // Batch writes should be awaited to ensure atomicity
+    await batch.commit();
   };
 
   const value = useMemo(
