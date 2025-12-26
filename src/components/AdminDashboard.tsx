@@ -1,5 +1,5 @@
 'use client';
-import { useContext, useState } from 'react';
+import { useContext, useState, useMemo } from 'react';
 import { ProductContext } from '@/context/ProductContext';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -10,12 +10,15 @@ import { Edit, PlusCircle, Trash2 } from 'lucide-react';
 import { ProductForm } from './ProductForm';
 import type { Product } from '@/lib/types';
 import { Skeleton } from './ui/skeleton';
+import { Checkbox } from './ui/checkbox';
 
 export function AdminDashboard() {
-  const { products, deleteProduct, isLoading } = useContext(ProductContext);
+  const { products, deleteProduct, deleteMultipleProducts, isLoading } = useContext(ProductContext);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
+  const [showDeleteMultipleDialog, setShowDeleteMultipleDialog] = useState(false);
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
 
   const handleAddNew = () => {
     setEditingProduct(null);
@@ -34,25 +37,73 @@ export function AdminDashboard() {
     }
   };
 
+  const handleDeleteMultipleConfirm = async () => {
+    if (selectedProducts.length > 0) {
+      await deleteMultipleProducts(selectedProducts);
+      setSelectedProducts([]);
+    }
+    setShowDeleteMultipleDialog(false);
+  };
+
   const onFormFinished = () => {
     setDialogOpen(false);
     setEditingProduct(null);
   }
+
+  const handleSelectAll = (checked: boolean | 'indeterminate') => {
+    if (checked === true) {
+      setSelectedProducts(products.map(p => p.id));
+    } else {
+      setSelectedProducts([]);
+    }
+  };
+
+  const handleSelectProduct = (productId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedProducts(prev => [...prev, productId]);
+    } else {
+      setSelectedProducts(prev => prev.filter(id => id !== productId));
+    }
+  };
+
+  const isAllSelected = useMemo(() => {
+    if (isLoading || products.length === 0) return false;
+    return selectedProducts.length === products.length;
+  }, [selectedProducts, products, isLoading]);
+  
+  const isIndeterminate = useMemo(() => {
+    return selectedProducts.length > 0 && selectedProducts.length < products.length;
+  }, [selectedProducts, products.length]);
 
   return (
     <main className="flex-1 p-4 md:p-6 lg:p-8">
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl md:text-3xl font-bold font-headline">Product Management</h1>
-          <Button onClick={handleAddNew}>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Add New Product
-          </Button>
+          <div className="flex items-center gap-2">
+            {selectedProducts.length > 0 && (
+              <Button variant="destructive" onClick={() => setShowDeleteMultipleDialog(true)}>
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete ({selectedProducts.length})
+              </Button>
+            )}
+            <Button onClick={handleAddNew}>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Add New Product
+            </Button>
+          </div>
         </div>
         <div className="border rounded-lg shadow-sm">
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-[60px] text-center">
+                  <Checkbox
+                    checked={isAllSelected || isIndeterminate}
+                    onCheckedChange={handleSelectAll}
+                    aria-label="Select all rows"
+                  />
+                </TableHead>
                 <TableHead className="w-[80px]">Image</TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Category</TableHead>
@@ -64,6 +115,7 @@ export function AdminDashboard() {
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <TableRow key={`skeleton-${i}`}>
+                    <TableCell><Skeleton className="w-5 h-5 mx-auto" /></TableCell>
                     <TableCell><Skeleton className="w-16 h-16 rounded-md" /></TableCell>
                     <TableCell><Skeleton className="h-5 w-32" /></TableCell>
                     <TableCell><Skeleton className="h-5 w-20" /></TableCell>
@@ -76,7 +128,14 @@ export function AdminDashboard() {
                 ))
               ) : products.length > 0 ? (
                 products.map((product) => (
-                  <TableRow key={product.id}>
+                  <TableRow key={product.id} data-state={selectedProducts.includes(product.id) ? 'selected' : undefined}>
+                    <TableCell className="text-center">
+                       <Checkbox
+                        checked={selectedProducts.includes(product.id)}
+                        onCheckedChange={(checked) => handleSelectProduct(product.id, !!checked)}
+                        aria-label={`Select row for ${product.name}`}
+                      />
+                    </TableCell>
                     <TableCell>
                       <Image
                         src={product.imageUrl}
@@ -108,7 +167,7 @@ export function AdminDashboard() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center h-24">
+                  <TableCell colSpan={6} className="text-center h-24">
                     No products yet. Add one to get started!
                   </TableCell>
                 </TableRow>
@@ -137,6 +196,20 @@ export function AdminDashboard() {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteConfirm}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <AlertDialog open={showDeleteMultipleDialog} onOpenChange={setShowDeleteMultipleDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete {selectedProducts.length} selected products.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteMultipleConfirm}>Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

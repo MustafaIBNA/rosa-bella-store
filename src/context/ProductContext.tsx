@@ -14,6 +14,7 @@ interface ProductContextType {
   addProduct: (product: Omit<Product, 'id'>) => Promise<void>;
   editProduct: (product: Product) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
+  deleteMultipleProducts: (ids: string[]) => Promise<void>;
   isLoading: boolean;
 }
 
@@ -22,6 +23,7 @@ export const ProductContext = createContext<ProductContextType>({
   addProduct: async () => {},
   editProduct: async () => {},
   deleteProduct: async () => {},
+  deleteMultipleProducts: async () => {},
   isLoading: true,
 });
 
@@ -53,12 +55,22 @@ export function ProductProvider({ children }: { children: ReactNode }) {
     await deleteDoc(productRef);
   };
 
+  const deleteMultipleProducts = async (ids: string[]) => {
+    if (!firestore) return;
+    const deletePromises = ids.map(id => {
+      const productRef = doc(firestore, 'products', id);
+      return deleteDoc(productRef);
+    });
+    await Promise.all(deletePromises);
+  };
+
   const value = useMemo(
     () => ({
       products: products || [],
       addProduct,
       editProduct,
       deleteProduct,
+      deleteMultipleProducts,
       isLoading,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
