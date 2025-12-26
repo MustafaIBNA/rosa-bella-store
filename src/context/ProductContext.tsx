@@ -1,3 +1,4 @@
+
 'use client';
 import { createContext, ReactNode, useMemo } from 'react';
 import type { Product } from '@/lib/types';
@@ -60,7 +61,8 @@ export function ProductProvider({ children }: { children: ReactNode }) {
       deleteProduct,
       isLoading,
     }),
-    [products, isLoading]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [products, isLoading, firestore]
   );
 
   return (
