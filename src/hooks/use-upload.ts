@@ -2,19 +2,20 @@
 'use client';
 
 import { useState } from 'react';
-import { getStorage, ref, uploadBytesResumable, getDownloadURL, UploadTaskSnapshot, FirebaseStorageError } from 'firebase/storage';
-import { v4 as uuidv4 } from 'uuid';
 import imageCompression from 'browser-image-compression';
-import { useFirebaseApp } from '@/firebase';
 import { useToast } from './use-toast';
+
+// Your Cloudinary credentials
+const CLOUDINARY_CLOUD_NAME = 'dadih12ut';
+const CLOUDINARY_UPLOAD_PRESET = 'rosabellastore_upload';
+const CLOUDINARY_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+const CLOUDINARY_FOLDER = 'products';
 
 export function useUpload() {
   const [isUploading, setIsUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   
-  const firebaseApp = useFirebaseApp();
-  const storage = getStorage(firebaseApp);
   const { toast } = useToast();
 
   const upload = (file: File): Promise<string> => {
@@ -38,25 +39,53 @@ export function useUpload() {
           useWebWorker: true,
         };
         const compressedFile = await imageCompression(file, options);
-        toast({ title: "Compression complete!", description: "Starting upload to storage..." });
+        toast({ title: "Compression complete!", description: "Starting upload to Cloudinary..." });
 
-        const fileExtension = compressedFile.name.split('.').pop() || 'jpg';
-        const fileName = `products/${uuidv4()}.${fileExtension}`;
-        const storageRef = ref(storage, fileName);
-        
-        const uploadTask = uploadBytesResumable(storageRef, compressedFile);
+        const formData = new FormData();
+        formData.append('file', compressedFile);
+        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+        formData.append('folder', CLOUDINARY_FOLDER);
 
-        const progressCallback = (snapshot: UploadTaskSnapshot) => {
-          const currentProgress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          setProgress(currentProgress);
+        const xhr = new XMLHttpRequest();
+
+        xhr.open('POST', CLOUDINARY_UPLOAD_URL, true);
+
+        // Track upload progress
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable) {
+            const currentProgress = (event.loaded / event.total) * 100;
+            setProgress(currentProgress);
+          }
         };
 
-        const errorCallback = (uploadError: FirebaseStorageError) => {
-          console.error("Upload failed inside error callback:", uploadError);
-          const errorMessage = uploadError.code === 'storage/unauthorized'
-            ? "Permission Denied: Your security rules are blocking the upload."
-            : `Upload failed: ${uploadError.message}`;
+        // Handle successful upload
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            const response = JSON.parse(xhr.responseText);
+            const downloadURL = response.secure_url;
+            
+            setProgress(100);
+            setIsUploading(false);
+            toast({ title: "Upload Complete!", description: "Image successfully uploaded." });
+            resolve(downloadURL);
+          } else {
+            // Handle HTTP errors
+            const errorMessage = `Cloudinary upload failed: ${xhr.statusText}`;
+            setError(errorMessage);
+            setIsUploading(false);
+            setProgress(0);
+            toast({
+              variant: "destructive",
+              title: "Upload Failed",
+              description: errorMessage,
+            });
+            reject(new Error(errorMessage));
+          }
+        };
 
+        // Handle network errors
+        xhr.onerror = () => {
+          const errorMessage = "A network error occurred during the upload.";
           setError(errorMessage);
           setIsUploading(false);
           setProgress(0);
@@ -65,29 +94,10 @@ export function useUpload() {
             title: "Upload Failed",
             description: errorMessage,
           });
-
-          // This is critical for the form to stop its submitting state
           reject(new Error(errorMessage));
         };
-
-        const completionCallback = async () => {
-          try {
-            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-            setProgress(100);
-            setIsUploading(false);
-            toast({ title: "Upload Complete!", description: "Image successfully uploaded." });
-            resolve(downloadURL);
-          } catch (urlError) {
-            console.error("Failed to get download URL:", urlError);
-            const errorMessage = "Upload succeeded, but failed to get the download URL.";
-            setError(errorMessage);
-            setIsUploading(false);
-            toast({ variant: "destructive", title: "URL Fetch Failed", description: errorMessage });
-            reject(new Error(errorMessage));
-          }
-        };
-
-        uploadTask.on('state_changed', progressCallback, errorCallback, completionCallback);
+        
+        xhr.send(formData);
 
       } catch (compressionError: any) {
         const errorMessage = `Image compression failed: ${compressionError.message}`;
