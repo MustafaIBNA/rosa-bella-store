@@ -41,7 +41,7 @@ export function Header() {
   return (
     <header className="px-4 lg:px-6 h-16 flex items-center shadow-sm sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
       <Link href="/" className="flex items-center justify-center" prefetch={false}>
-        <Image src="/logo.png" alt="Rosabella Logo" width={70} height={70} priority />
+        <Image src="/logo.png" alt="Rosabella Logo" width={40} height={40} priority />
       </Link>
       <nav className="ml-auto flex gap-4 sm:gap-6 items-center">
         <Button variant="ghost" asChild>
