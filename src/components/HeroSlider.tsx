@@ -11,7 +11,26 @@ import {
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 const sliderImages = PlaceHolderImages.filter(img => ['hero-1', 'hero-2', 'hero-3'].includes(img.id));
-
+const heroImages = [
+  {
+    id: 'hero-1',
+    imageUrl: '/images/hero-1.jpg',
+    description: 'A beautifully crafted artisan coaster on a textured surface.',
+    imageHint: 'artisan coaster',
+  },
+  {
+    id: 'hero-2',
+    imageUrl: '/images/hero-2.jpg',
+    description: 'An elegant, handcrafted candle casting a warm glow.',
+    imageHint: 'elegant candle',
+  },
+  {
+    id: 'hero-3',
+    imageUrl: '/images/hero-3.jpg',
+    description: 'A detailed shot of a unique, handmade coaster.',
+    imageHint: 'handmade coaster',
+  },
+];
 export function HeroSlider() {
     const slideData = [
     {
@@ -39,7 +58,7 @@ export function HeroSlider() {
         }}
       >
         <CarouselContent className="h-[400px] md:h-[500px] lg:h-[600px]">
-          {orderedImages.map((image, index) => {
+          {heroImages.map((image, index) => {
             const slide = slideData[index % slideData.length];
             return(
               <CarouselItem key={image.id}>
